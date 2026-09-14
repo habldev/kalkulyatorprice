@@ -1,6 +1,6 @@
 // Закрепляет калькулятор на устройстве, чтобы он открывался без интернета.
 // При обновлении прайса поменяйте номер версии ниже — старая копия заменится.
-const VERSION = 'price-v4';
+const VERSION = 'price-v7';
 const FILES = ['./', './index.html', './apple-touch-icon.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

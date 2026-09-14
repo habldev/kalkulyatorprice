@@ -29,32 +29,59 @@ button,select,input,textarea{font:inherit;color:inherit}
 button{border:0;background:none;cursor:pointer}
 :focus-visible{outline:2px solid var(--signal);outline-offset:2px}
 
-.rig{background:var(--slab);color:#DCE3E8;position:sticky;top:0;z-index:20;
-     padding:calc(10px + env(safe-area-inset-top)) 14px 12px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-.rig-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
-.rig-title{font-size:13px;color:#9FB0BC}
-.rig-date{font-size:12px;color:#7E909D;font-variant-numeric:tabular-nums}
-.readout{background:var(--lcd);border-radius:5px;padding:9px 13px 11px;
-  box-shadow:inset 0 2px 7px rgba(0,0,0,.38),0 1px 0 rgba(255,255,255,.08);
-  font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace}
-.readout-label{font-size:11px;color:var(--lcd-dim);letter-spacing:.04em}
-.readout-value{font-size:clamp(2.1rem,11.5vw,3rem);font-weight:600;color:var(--lcd-ink);
-  line-height:1.05;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
-  display:flex;align-items:baseline;gap:.18em}
-.readout-value .cur{font-size:.42em;font-weight:500;color:var(--lcd-dim)}
-.meters{display:flex;gap:1px;margin-top:9px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
-.meter{flex:1;background:var(--slab-2);padding:7px 9px;min-width:0}
-.meter-k{font-size:10.5px;color:#8798A4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meter-v{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:#E4EBF0;
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- корпус прибора ---------- */
+.rig{position:sticky;top:0;z-index:20;padding:calc(8px + env(safe-area-inset-top)) 10px 10px;
+  background:
+    linear-gradient(180deg,#323E49 0%,#26303A 42%,#1E2831 100%);
+  box-shadow:0 3px 14px rgba(0,0,0,.35)}
+.plate{position:relative;border-radius:12px;padding:12px 13px 13px;
+  background:
+    repeating-linear-gradient(97deg,rgba(255,255,255,.028) 0 1px,transparent 1px 3px),
+    linear-gradient(165deg,#3A4653 0%,#2B3641 55%,#222C35 100%);
+  border:1px solid #47545F;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 2px 8px rgba(0,0,0,.30)}
+/* винты по углам */
+.plate::before,.plate::after{content:'';position:absolute;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#8A98A4,#4B5762 60%,#39434D);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);top:7px}
+.plate::before{left:7px} .plate::after{right:7px}
+
+.rig-top{display:flex;align-items:baseline;justify-content:space-between;margin:0 14px 9px}
+.rig-brand{font-size:10.5px;letter-spacing:.16em;color:#93A3B0;text-transform:uppercase}
+.rig-date{font-size:11px;color:#7E909D;font-variant-numeric:tabular-nums}
+
+/* ---------- жидкокристаллическое табло ---------- */
+.lcd{border-radius:6px;padding:3px;
+  background:linear-gradient(180deg,#171E24,#232D35);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.55)}
+.lcd-face{position:relative;border-radius:4px;padding:8px 11px 9px;overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 50% 0%,#D3DCCD 0%,#C4CFC0 55%,#B6C2B2 100%)}
+.lcd-face::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.045) 0 1px,transparent 1px 3px)}
+.lcd-label{font:11px/1 ui-monospace,Menlo,monospace;color:#5F6D5D;letter-spacing:.08em}
+.lcd-digits{margin:5px 0 2px;min-height:52px;display:flex;align-items:flex-end}
+.lcd-digits svg{width:100%;height:auto;max-height:64px;display:block}
+.lcd-sub{display:flex;gap:10px;border-top:1px solid rgba(22,30,21,.22);padding-top:6px}
+.sub{flex:1;min-width:0}
+.sub i{display:block;font:normal 9.5px/1.2 ui-monospace,Menlo,monospace;color:#66755F}
+.sub b{display:block;font:600 13px/1.25 ui-monospace,Menlo,monospace;color:#1B2419;
   font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.meter-v.cut{color:#F2B441}
-.disc{margin-top:9px;display:flex;align-items:center;gap:9px}
-.disc label{font-size:12.5px;color:#9FB0BC}
-.disc select{background:var(--slab-2);color:#E4EBF0;border:1px solid #3B4854;border-radius:5px;
-  padding:7px 10px;min-height:var(--tap);flex:1;font-variant-numeric:tabular-nums;
-  -webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' fill='none' stroke='%239FB0BC' stroke-width='1.8'/></svg>");
-  background-repeat:no-repeat;background-position:right 11px center}
+.sub b.cut{color:#7A4A12}
+
+/* ---------- поворотный регулятор ---------- */
+.knobrow{display:flex;align-items:center;gap:13px;margin-top:11px}
+.knob{width:108px;height:108px;flex:none;touch-action:none;cursor:grab}
+.knob:active{cursor:grabbing}
+.knob svg{width:100%;height:100%;display:block}
+.knob:focus-visible{outline:2px solid #7FB7E0;outline-offset:3px;border-radius:50%}
+.knobinfo{min-width:0}
+.knobcap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#93A3B0}
+.knobval{font:600 26px/1.15 ui-monospace,Menlo,monospace;color:#F2B441;
+  font-variant-numeric:tabular-nums;margin:1px 0 3px}
+.knobhint{font-size:11px;color:#7E909D;line-height:1.3}
 
 .empty{padding:52px 26px;text-align:center;color:var(--muted)}
 .empty b{display:block;color:var(--ink);font-weight:600;margin-bottom:5px;font-size:17px}
@@ -141,22 +168,28 @@ button{border:0;background:none;cursor:pointer}
   padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;gap:9px;
   max-width:190mm;margin:0 auto}
 .docpage{max-width:190mm;margin:0 auto;padding:14px 14px 60px;
-  font:11pt/1.38 "Times New Roman",Times,serif;color:#000}
-.docpage h1{font-size:13pt;text-align:center;margin:0 0 10px}
-.docpage h2{font-size:11.5pt;margin:13px 0 5px}
-.docpage p{margin:0 0 6px;text-align:justify}
+  font:10pt/1.25 "Times New Roman",Times,serif;color:#000}
+.docpage h1{font-size:12pt;text-align:center;margin:0 0 6px}
+.docpage h2{font-size:10pt;margin:7px 0 3px}
+.docpage p{margin:0 0 3px;text-align:justify}
+.docpage .terms{column-count:2;column-gap:6mm;font-size:7.4pt;line-height:1.18;
+  text-align:justify;margin:3px 0 5px}
+.docpage .terms p{margin:0 0 2px}
+.docpage .terms h2{font-size:8pt;margin:0 0 2px;break-after:avoid}
+.docpage .terms ul{margin:1px 0 2px 13px}
 .docpage .fill{border-bottom:1px solid #000;display:inline-block;min-width:60px;padding:0 3px}
-.docpage table{width:100%;border-collapse:collapse;margin:7px 0;font-size:10pt}
-.docpage th,.docpage td{border:1px solid #000;padding:3px 5px;vertical-align:top}
+.docpage table{width:100%;border-collapse:collapse;margin:4px 0;font-size:8.6pt}
+.docpage th,.docpage td{border:1px solid #000;padding:2px 4px;vertical-align:top}
 .docpage th{background:#EEE;font-weight:bold;text-align:center}
 .docpage td.n,.docpage td.c{text-align:center}
 .docpage td.r{text-align:right;white-space:nowrap}
 .docpage .sig{display:flex;gap:18px;margin-top:16px}
 .docpage .sig>div{flex:1}
-.docpage .sigbox{border-bottom:1px solid #000;height:72px;margin:6px 0 2px;position:relative}
-.docpage .sigpad{width:100%;height:72px;display:block;touch-action:none;cursor:crosshair}
-.docpage .sigimg{max-height:68px;max-width:100%;display:block;margin-top:2px}
-.docpage .sigcap{font-size:9.5pt}
+.docpage .sigbox{border-bottom:1px solid #000;height:60px;margin:4px 0 2px;position:relative}
+.docpage .sigpad{width:100%;height:60px;display:block;touch-action:none;cursor:crosshair}
+.docpage .sigimg{max-height:56px;max-width:100%;display:block;margin-top:2px}
+.docpage .sigcap{font-size:8.6pt}
+.docpage .sig{margin-top:8px;gap:14px}
 .docpage .sigclr{font-size:9pt;color:#0A6FB8;padding:2px 0;text-decoration:underline}
 .docpage .sighint{font-size:9pt;color:#555;margin-top:2px}
 .docpage .tot{margin:8px 0}
@@ -167,9 +200,20 @@ button{border:0;background:none;cursor:pointer}
   .rig,.bar,.wrap,.sheet{display:none!important}
   .docbar,.sigclr,.sighint{display:none!important}
   .docview.on{position:static;display:block;overflow:visible}
-  .docpage{max-width:none;padding:0}
-  @page{size:A4;margin:14mm}
+  .docpage{max-width:none;padding:10mm;font-size:9.4pt;line-height:1.2}
+  .docpage h1{font-size:11pt}
+  .docpage h2{font-size:9.4pt;margin:5px 0 2px}
+  .docpage .terms{font-size:6.6pt;line-height:1.14;column-gap:5mm}
+  .docpage .terms h2{font-size:7.2pt}
+  .docpage table{font-size:8.2pt;margin:3px 0}
+  .docpage th,.docpage td{padding:1.5px 3px}
+  .docpage .sigbox{height:52px}
+  .docpage .sigimg{max-height:48px}
+  /* нулевые поля страницы: так Safari не печатает адрес сайта и дату.
+     Отступы вместо них заданы внутри .docpage */
+  @page{size:A4;margin:0}
 }
+body.printing #docBody{width:718px;max-width:none}   /* 190 мм при 96 dpi */
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -177,17 +221,35 @@ button{border:0;background:none;cursor:pointer}
 
 <div class="wrap">
   <header class="rig">
-    <div class="rig-top"><span class="rig-title">Расчёт заказа</span><span class="rig-date" id="date"></span></div>
-    <div class="readout">
-      <div class="readout-label">Итого к оплате</div>
-      <div class="readout-value"><span id="total">0</span><span class="cur">₽</span></div>
+    <div class="plate">
+      <div class="rig-top">
+        <span class="rig-brand">Савинов · сервис</span>
+        <span class="rig-date" id="date"></span>
+      </div>
+
+      <div class="lcd">
+        <div class="lcd-face">
+          <div class="lcd-label">Итого к оплате</div>
+          <div class="lcd-digits" id="total"></div>
+          <div class="lcd-sub">
+            <div class="sub"><i>Позиций</i><b id="mCount">0</b></div>
+            <div class="sub"><i>Без скидки</i><b id="mGross">0 ₽</b></div>
+            <div class="sub"><i>Скидка</i><b id="mCut" class="cut">0 ₽</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="knobrow">
+        <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Размер скидки"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="без скидки"></div>
+        <div class="knobinfo">
+          <div class="knobcap">Скидка</div>
+          <div class="knobval" id="knobVal">выкл</div>
+          <div class="knobhint">Крутите ручку или нажмите на деление</div>
+        </div>
+      </div>
+      <select id="disc" class="sr"></select>
     </div>
-    <div class="meters">
-      <div class="meter"><div class="meter-k">Позиций</div><div class="meter-v" id="mCount">0</div></div>
-      <div class="meter"><div class="meter-k">Без скидки</div><div class="meter-v" id="mGross">0 ₽</div></div>
-      <div class="meter"><div class="meter-k">Скидка</div><div class="meter-v cut" id="mCut">0 ₽</div></div>
-    </div>
-    <div class="disc"><label for="disc">Скидка</label><select id="disc"></select></div>
   </header>
   <main id="order"></main>
 </div>
@@ -231,6 +293,20 @@ button{border:0;background:none;cursor:pointer}
   <div class="sheet-body"><div class="sheet-body-in" id="formBody"></div></div>
 </div>
 
+<!-- архив заказов -->
+<div class="sheet" id="arch">
+  <div class="sheet-top">
+    <div class="sheet-row">
+      <span class="sheet-h">Архив заказов</span>
+      <button class="btn btn-ghost" id="bArchClose">Закрыть</button>
+    </div>
+    <div class="sheet-row" style="margin-top:8px">
+      <input class="search" id="aq" type="search" placeholder="Поиск: имя, техника, номер" autocomplete="off">
+    </div>
+  </div>
+  <div class="sheet-body"><div class="sheet-body-in" id="archBody"></div></div>
+</div>
+
 <!-- документ -->
 <div class="docview" id="docview">
   <div class="docbar">
@@ -265,6 +341,151 @@ for (let v=0; v<=100; v+=5){
   dsel.appendChild(o);
 }
 dsel.onchange = e => { discount = +e.target.value; render(); };
+
+
+// ---------- семисегментное табло ----------
+// Рисуем сегменты вручную: шрифт качать нельзя, приложение обязано жить офлайн.
+const SEG_MAP = {
+  '0':'abcdef', '1':'bc', '2':'abged', '3':'abgcd', '4':'fgbc',
+  '5':'afgcd', '6':'afgedc', '7':'abc', '8':'abcdefg', '9':'abfgcd'
+};
+const D_W = 100, D_H = 180, SEG_T = 17;
+
+function hSeg(y, x1, x2){
+  const t = SEG_T/2;
+  return `${x1},${y} ${x1+t},${y-t} ${x2-t},${y-t} ${x2},${y} ${x2-t},${y+t} ${x1+t},${y+t}`;
+}
+function vSeg(x, y1, y2){
+  const t = SEG_T/2;
+  return `${x},${y1} ${x+t},${y1+t} ${x+t},${y2-t} ${x},${y2} ${x-t},${y2-t} ${x-t},${y1+t}`;
+}
+const SEG_PTS = {
+  a: hSeg(11, 13, 87), g: hSeg(90, 13, 87), d: hSeg(169, 13, 87),
+  f: vSeg(13, 11, 90),  b: vSeg(87, 11, 90),
+  e: vSeg(13, 90, 169),  c: vSeg(87, 90, 169),
+};
+
+function segDigit(ch, x){
+  const on = SEG_MAP[ch] || '';
+  let out = `<g transform="translate(${x},0)">`;
+  for (const k of 'abcdefg'){
+    const lit = on.includes(k);
+    out += `<polygon points="${SEG_PTS[k]}" fill="${lit ? '#151D14' : '#151D14'}" `+
+           `opacity="${lit ? 0.93 : 0.07}"/>`;
+  }
+  return out + '</g>';
+}
+
+// Табло показывает число с разрядами и знаком рубля
+function segRender(num){
+  const txt = fmt(num);                 // «21 915»
+  let x = 0, body = '';
+  for (const ch of txt){
+    if (ch === ' '){ x += 42; continue; }
+    body += segDigit(ch, x);
+    x += D_W + 16;
+  }
+  // знак рубля рисуем контуром — сегментами он не собирается
+  const rw = 96;
+  const rub = `<g transform="translate(${x+6},0)" opacity="0.88">
+    <path d="M18 18 L18 150 M18 18 L56 18 A34 34 0 0 1 56 86 L18 86 M4 112 L64 112"
+      fill="none" stroke="#151D14" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>`;
+  const W = x + rw;
+  return `<svg viewBox="0 0 ${W} ${D_H}" xmlns="http://www.w3.org/2000/svg" `+
+         `preserveAspectRatio="xMaxYMax meet" aria-hidden="true">${body}${rub}</svg>`;
+}
+
+// ---------- поворотный регулятор скидки ----------
+const K_MIN = -135, K_MAX = 135, K_STEPS = 20;     // 0..100 с шагом 5
+const angOf = v => K_MIN + (v/100) * (K_MAX - K_MIN);
+
+function buildKnob(){
+  let ticks = '';
+  for (let i = 0; i <= K_STEPS; i++){
+    const v = i*5, a = angOf(v), big = (v % 25 === 0);
+    ticks += `<g transform="rotate(${a} 70 70)">`+
+      `<rect x="69.1" y="${big?10:12}" width="1.8" height="${big?10:6}" rx="0.9" `+
+      `fill="${big?'#C7D5E0':'#7A8794'}" data-tick="${v}"/></g>`;
+    if (big){
+      const rad = (a-90) * Math.PI/180, r = 66;
+      ticks += `<text x="${70+r*Math.cos(rad)}" y="${70+r*Math.sin(rad)+3.4}" `+
+               `text-anchor="middle" font-size="9" fill="#93A3B0" `+
+               `font-family="ui-monospace,Menlo,monospace">${v}</text>`;
+    }
+  }
+  return `<svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="kb" cx="38%" cy="30%">
+        <stop offset="0%" stop-color="#5A6774"/><stop offset="62%" stop-color="#3A4551"/>
+        <stop offset="100%" stop-color="#232C35"/>
+      </radialGradient>
+      <linearGradient id="kr" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6E7C89"/><stop offset="100%" stop-color="#2B343D"/>
+      </linearGradient>
+    </defs>
+    ${ticks}
+    <circle cx="70" cy="70" r="47" fill="url(#kr)"/>
+    <circle cx="70" cy="70" r="43" fill="url(#kb)" stroke="#1C242B" stroke-width="1"/>
+    <g id="kPtr" transform="rotate(-135 70 70)">
+      <rect x="67.6" y="31" width="4.8" height="26" rx="2.4" fill="#F2B441"/>
+      <circle cx="70" cy="70" r="7" fill="#20282F" stroke="#4A5561" stroke-width="1"/>
+    </g>
+  </svg>`;
+}
+
+function setDiscount(v){
+  v = Math.max(0, Math.min(100, Math.round(v/5)*5));
+  discount = v;
+  dsel.value = v;
+  render();
+}
+
+function paintKnob(){
+  const p = document.getElementById('kPtr');
+  if (p) p.setAttribute('transform', `rotate(${angOf(discount)} 70 70)`);
+  const k = $('#knob');
+  k.setAttribute('aria-valuenow', discount);
+  k.setAttribute('aria-valuetext', discount ? discount+'%' : 'без скидки');
+  $('#knobVal').textContent = discount ? discount+'%' : 'выкл';
+}
+
+function initKnob(){
+  const k = $('#knob');
+  k.innerHTML = buildKnob();
+  let drag = false;
+  const fromEvent = e => {
+    const r = k.getBoundingClientRect();
+    const p = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    const dx = p.clientX - (r.left + r.width/2);
+    const dy = p.clientY - (r.top + r.height/2);
+    let a = Math.atan2(dx, -dy) * 180/Math.PI;      // 0° — вверх
+    a = Math.max(K_MIN, Math.min(K_MAX, a));
+    setDiscount((a - K_MIN) / (K_MAX - K_MIN) * 100);
+  };
+  const down = e => { drag = true; e.preventDefault(); fromEvent(e); };
+  const move = e => { if (drag){ e.preventDefault(); fromEvent(e); } };
+  const up   = () => { drag = false; };
+  if (window.PointerEvent){
+    k.addEventListener('pointerdown', down);
+    k.addEventListener('pointermove', move);
+    k.addEventListener('pointerup', up);
+    k.addEventListener('pointercancel', up);
+  } else {
+    k.addEventListener('touchstart', down, {passive:false});
+    k.addEventListener('touchmove', move, {passive:false});
+    k.addEventListener('touchend', up);
+    k.addEventListener('mousedown', down);
+    k.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  }
+  k.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp'){ setDiscount(discount+5); e.preventDefault(); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown'){ setDiscount(discount-5); e.preventDefault(); }
+    if (e.key === 'Home'){ setDiscount(0); e.preventDefault(); }
+    if (e.key === 'End'){ setDiscount(100); e.preventDefault(); }
+  });
+}
 
 // гарантия от суммы строки
 function autoW(sum){ if (!sum) return 0; return sum<=5000 ? 30 : (sum<=10000 ? 60 : 90); }
@@ -311,7 +532,8 @@ function totals(){
 
 function render(){
   const t = totals();
-  $('#total').textContent = fmt(t.net);
+  $('#total').innerHTML = segRender(t.net);
+  paintKnob();
   $('#mCount').textContent = order.length;
   $('#mGross').textContent = fmt(t.gross)+' ₽';
   $('#mCut').textContent = (t.cut?'−':'')+fmt(t.cut)+' ₽';
@@ -507,8 +729,114 @@ $('#bAdd').onclick = () => { openCat=null; $('#q').value=''; drawList(); $('#she
 $('#bDone').onclick = () => $('#sheet').classList.remove('on');
 $('#bNew').onclick = () => {
   if (order.length && !confirm('Очистить заказ и начать заново?')) return;
-  order=[]; discount=0; dsel.value=0; render();
+  order=[]; discount=0; dsel.value=0; curId=null; render();
 };
+
+// ---------- архив заказов ----------
+// Хранится в самом телефоне. Если браузер запретил хранилище,
+// приложение продолжает работать — просто без архива.
+const DBKEY = 'orders.v1';
+let store = null;      // null = хранилище недоступно
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(DBKEY);
+    store = raw ? JSON.parse(raw) : [];
+  }catch(e){ store = null; }
+}
+function saveStore(){
+  if (!store) return false;
+  try{ localStorage.setItem(DBKEY, JSON.stringify(store.slice(0,300))); return true; }
+  catch(e){ return false; }
+}
+loadStore();
+
+let curId = null;      // id открытого/сохранённого заказа
+
+function snapshot(){
+  const t = totals();
+  return {
+    id: curId || Date.now(),
+    saved: new Date().toISOString(),
+    date: today(),
+    client: C.client || '', phone: C.phone || '',
+    device: C.device || '', docNo: C.docNo || '',
+    total: t.net, gross: t.gross, discount,
+    lines: JSON.parse(JSON.stringify(order)),
+    fields: JSON.parse(JSON.stringify(C)),
+  };
+}
+
+function saveOrder(silent){
+  if (!store){ if(!silent) alert('Телефон не разрешил приложению хранить данные — архив недоступен.'); return; }
+  if (!order.length){ if(!silent) alert('Заказ пуст — нечего сохранять.'); return; }
+  const rec = snapshot();
+  curId = rec.id;
+  const i = store.findIndex(r => r.id === rec.id);
+  if (i >= 0) store[i] = rec; else store.unshift(rec);
+  const ok = saveStore();
+  if (!silent) alert(ok ? 'Заказ сохранён в архив.' : 'Не удалось сохранить — в телефоне кончилось место для данных.');
+}
+
+function openOrder(rec){
+  order = JSON.parse(JSON.stringify(rec.lines));
+  discount = rec.discount || 0;
+  dsel.value = discount;
+  Object.keys(C).forEach(k => delete C[k]);
+  Object.assign(C, rec.fields || {});
+  curId = rec.id;
+  render();
+  $('#arch').classList.remove('on');
+}
+
+function delOrder(id){
+  if (!store) return;
+  store = store.filter(r => r.id !== id);
+  saveStore();
+  if (curId === id) curId = null;
+  buildArch();
+}
+
+function buildArch(){
+  const box = $('#archBody');
+  box.innerHTML = '';
+  if (!store){
+    box.innerHTML = '<div class="none">Телефон не разрешил хранить данные, поэтому архив недоступен. Расчёты можно отправлять текстом или сохранять в PDF.</div>';
+    return;
+  }
+  const q = $('#aq').value.trim().toLowerCase();
+  const list = q
+    ? store.filter(r => (r.client+' '+r.device+' '+r.docNo).toLowerCase().includes(q))
+    : store;
+  if (!list.length){
+    box.innerHTML = '<div class="none">' +
+      (q ? 'Ничего не нашлось.' : 'Архив пуст. Сохраните первый заказ через «Оформить».') + '</div>';
+    return;
+  }
+  list.forEach(r => {
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML =
+      '<div class="opt-main">'+
+        '<div class="opt-t"></div>'+
+        '<div class="opt-s"></div>'+
+      '</div>'+
+      '<div class="opt-p">'+fmt(r.total)+' ₽</div>'+
+      '<button class="line-del" aria-label="Удалить">×</button>';
+    el.querySelector('.opt-t').textContent = r.client || 'Без имени';
+    el.querySelector('.opt-s').textContent =
+      r.date + ' · ' + (r.device || 'техника не указана') + ' · ' + r.lines.length + ' поз.';
+    el.querySelector('.opt-main').onclick = () => {
+      if (order.length && !confirm('Открыть заказ? Текущий расчёт будет заменён.')) return;
+      openOrder(r);
+    };
+    el.querySelector('.line-del').onclick = e => {
+      e.stopPropagation();
+      if (confirm('Удалить заказ из архива?')) delOrder(r.id);
+    };
+    box.appendChild(el);
+  });
+}
 
 // ---------- данные клиента ----------
 const FIELDS = [
@@ -530,6 +858,10 @@ const FIELDS = [
   ['g','Деньги и сроки'],
   ['prepay','Предоплата / аванс, ₽','text'],
   ['term','Планируемый срок, дней','text'],
+  ['g','Дополнительное соглашение'],
+  ['dsNo','Номер соглашения','text'],
+  ['baseSum','Сумма по основному договору, ₽','text'],
+  ['extraDays','Продление срока, дней','text'],
   ['g','Гарантийный талон'],
   ['talonNo','Номер талона','text'],
   ['seals','Номера гарантийных пломб','text'],
@@ -575,7 +907,7 @@ function rowsTable(cols){
       : '<td class="r">'+fmt(sum)+'</td><td class="c">'+(w?w+' дн.':'—')+'</td>';
     h += '</tr>';
   });
-  const need = Math.max(0, 3-order.length);
+  const need = order.length ? 0 : 3;   // пустые строки только для незаполненного бланка
   for (let i=0;i<need;i++)
     h += '<tr><td class="n">&nbsp;</td><td></td><td></td><td></td>'+(cols==='full'?'<td></td><td></td>':'')+'</tr>';
   return h + '</table>';
@@ -669,7 +1001,7 @@ function docNaryad(){
 <p>Заявленная неисправность: ${fill(C.fault,300)}</p>
 <p>Внешний вид, сколы, повреждения при приеме: ${fill(C.look,280)}</p>
 
-<h2>2. УСЛОВИЯ ОКАЗАНИЯ УСЛУГ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h2>
+<div class="terms"><h2>2. УСЛОВИЯ ОКАЗАНИЯ УСЛУГ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h2>
 <p>2.1. Срок выполнения работ: от 1 до 14 рабочих дней. Срок может быть автоматически увеличен Исполнителем в одностороннем порядке в случаях: сложности/плавающего характера диагностики, отсутствия запчастей у поставщиков (на срок поставки), а также временной нетрудоспособности Исполнителя по состоянию здоровья.</p>
 <p>2.2. Связь и согласование: Все уведомления, согласование сметы и сроков производятся через мессенджеры (Telegram, WhatsApp) по номеру Заказчика или аудиозвонком в Telegram. Письменное подтверждение в мессенджере («Да», «Согласен») имеет полную юридическую силу (ст. 434 ГК РФ). При увеличении объема/стоимости работ Исполнитель досогласовывает изменения указанными средствами связи.</p>
 <p>2.3. Предоплата и отказ от ремонта: В случае отказа Заказчика от ремонта после проведения диагностики или доставки техники, внесенная предоплата Заказчику не возвращается и удерживается Исполнителем в качестве компенсации фактически понесенных расходов (ст. 32 Закона РФ «О ЗПП», ст. 782 ГК РФ). Фиксированная стоимость диагностики/приема без транспортировки — 1 500 руб., с транспортировкой/доставкой — 2 500 руб.</p>
@@ -687,6 +1019,7 @@ function docNaryad(){
 <p>2.9.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
 <p>2.9.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (Telegram, WhatsApp) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
 <p>2.9.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+</div>
 <h2>3. СОГЛАСОВАНИЕ СМЕТЫ И СТОИМОСТИ (заполняется и подписывается ДО начала работ)</h2>
 ${tbl}
 <p class="tot"><b>ОБЩАЯ СТОИМОСТЬ:</b> ${fill(fmt(t.net)+' руб.')}
@@ -720,7 +1053,7 @@ function docRabot(){
 ${rowsTable('full')}
 ${moneyBlock()}
 
-<p>1.4. Заказчик обязуется оплатить работы непосредственно после подписания акта выполненных работ.</p>
+<div class="terms"><p>1.4. Заказчик обязуется оплатить работы непосредственно после подписания акта выполненных работ.</p>
 <p>1.5. В случае невозможности выполнения работ в месте нахождения Заказчика работы проводятся в месте нахождения Исполнителя. Срок выполнения работ составляет не более 60 рабочих дней с момента заключения настоящего договора.</p>
 <p>1.6. До заключения договора Заказчик ознакомился с расценками, содержащимися в Прейскуранте Исполнителя, условиями предоставления гарантии на отдельные виды работ, в полном объеме. До заключения договора до Заказчика Исполнителем доведена информация о выполняемых работах, гарантийных сроках на оказываемые услуги в объеме, предусмотренном действующим законодательством.</p>
 <p>1.7. Исполнитель несет гарантийные обязательства за работы, выполненные в соответствии с настоящим Договором в случае, если в соответствующем разделе п. 1.3 Договора установлен гарантийный срок. В случае обнаружения Заказчиком недостатков работ в момент их приемки об этом делается пометка в акте выполненных работ. В случае, если видимые недостатки, на наличие которых впоследствии ссылается Заказчик, не были отражены в акте выполненных работ, данные недостатки не подлежат устранению Исполнителем на безвозмездной основе.</p>
@@ -735,6 +1068,7 @@ ${moneyBlock()}
 <p>1.10.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
 <p>1.10.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (Telegram, WhatsApp) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
 <p>1.10.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+</div>
 <h2>РЕКВИЗИТЫ СТОРОН</h2>
 <table>
   <tr><th style="width:50%">Исполнитель</th><th>Заказчик</th></tr>
@@ -760,7 +1094,7 @@ function docTalon(){
 <h2>1. СРОКИ И УСЛОВИЯ ГАРАНТИЙНОГО ОБСЛУЖИВАНИЯ</h2>
 <p>1.1. Гарантийный срок на выполненные работы и установленные запчасти указан в таблице ниже и исчисляется с даты подписания Акта выполненных работ.</p>
 ${rowsTable('short')}
-<p>1.2. Перечень выполненных работ и установленных деталей, на которые распространяется гарантия, указывается в Договоре-Заказ-наряде.</p>
+<div class="terms"><p>1.2. Перечень выполненных работ и установленных деталей, на которые распространяется гарантия, указывается в Договоре-Заказ-наряде.</p>
 <p>1.3. Гарантийное обслуживание предоставляется только при условии сохранности и предъявления оригиналов Договора-Заказ-наряда и настоящего Гарантийного талона.</p>
 <p>1.4. При заявлении о гарантийном случае Исполнитель обязуется прибыть к Заказчику (либо принять технику) для проведения диагностики и устранения недостатков в срок до 10 (десяти) рабочих дней с момента получения письменного обращения (через Telegram/WhatsApp).</p>
 
@@ -790,16 +1124,49 @@ ${rowsTable('short')}
 <p>4.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
 <p>4.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (Telegram, WhatsApp) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
 <p>4.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+</div>
 <p>С условиями гарантийного обслуживания, правилами эксплуатации и порядком оплаты негарантийных вызовов ознакомлен и согласен. Пломбы проверены, целостность подтверждаю.</p>
 ${sigPair('Исполнитель:','Заказчик:','t1','<div class="sigcap">Дата выдачи: «____» ____________ 2026 г.</div>')}`;
+}
+
+function docDop(){
+  const t = totals();
+  const base = parseInt(String(C.baseSum||'').replace(/[^0-9]/g,''),10) || 0;
+  const was = base, now = base + t.net;
+  return `
+<h1>ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № ${fill(C.dsNo,60)}</h1>
+<p style="text-align:center">к Договору-Заказ-наряду № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</p>
+<p style="text-align:center">г. ______________ &nbsp;&nbsp; «____» ____________ 2026 г.</p>
+
+<p><b>Исполнитель:</b> ${EXEC}</p>
+<p><b>Заказчик (ФИО):</b> ${fill(C.client,200)}, тел.: ${fill(C.phone,110)}</p>
+<p><b>Оборудование:</b> ${fill(C.device,180)}, Модель/Заводской №: ${fill(C.serial,150)}</p>
+
+<p>1. В ходе выполнения работ по Договору-Заказ-наряду выявлена необходимость проведения дополнительных работ и (или) установки дополнительных деталей и материалов. Стороны пришли к соглашению дополнить перечень работ по Договору следующими позициями:</p>
+${rowsTable('full')}
+${moneyBlock()}
+
+<p>2. Стоимость дополнительных работ и материалов по настоящему соглашению составляет ${fill(fmt(t.net)+' руб.')}${t.cut ? ' (с учётом скидки '+discount+'% в размере '+fmt(t.cut)+' руб.)' : ''}.</p>
+<p>3. Общая стоимость работ по Договору с учётом настоящего соглашения изменяется: было ${fill(base?fmt(was)+' руб.':'',90)} — стало ${fill(base?fmt(now)+' руб.':'',90)}.</p>
+<p>4. Срок выполнения работ по Договору продлевается на ${fill(C.extraDays,45)} рабочих дней с момента подписания настоящего соглашения.</p>
+<p>5. Гарантийные сроки на дополнительные работы и детали указаны в таблице п. 1 настоящего соглашения и исчисляются с даты подписания Акта выполненных работ.</p>
+<p>6. Заказчик подтверждает, что необходимость дополнительных работ, их состав, стоимость и срок с ним согласованы до начала их выполнения. Возражений не имеет, работы разрешает.</p>
+<p>7. Остальные условия Договора-Заказ-наряда остаются неизменными. Настоящее соглашение является неотъемлемой частью Договора, составлено в двух экземплярах и подписывается в порядке, установленном п. 2.9 Договора (простая электронная подпись).</p>
+
+${sigPair('Исполнитель:','Заказчик (работы разрешаю):','d1')}`;
 }
 
 // ---------- оформить ----------
 const OUTS = [
   ['Данные клиента', 'ФИО, техника, адрес — подставятся во все документы', () => { $('#outs').classList.remove('on'); buildForm(); $('#form').classList.add('on'); }],
   ['Расчёт текстом', 'Скопировать или отправить в мессенджер', shareText],
+  ['Сохранить заказ', 'Положить текущий расчёт в архив на телефоне', () => saveOrder(false)],
+  ['Архив заказов', 'Открыть или повторить прошлый заказ', () => {
+      $('#outs').classList.remove('on'); $('#aq').value=''; buildArch(); $('#arch').classList.add('on');
+  }],
   ['Договор-заказ-наряд', 'Приёмка техники, смета и акт выполненных работ', () => openDoc(docNaryad)],
   ['Договор на выполнение работ', 'Работы на месте, со скидкой и авансом', () => openDoc(docRabot)],
+  ['Дополнительное соглашение', 'Если после согласования добавились работы', () => openDoc(docDop)],
   ['Гарантийный талон', 'Со сроками гарантии по каждой позиции', () => openDoc(docTalon)],
 ];
 
@@ -822,13 +1189,41 @@ function openDoc(builder){
   $('#docview').classList.add('on');
   document.querySelector('#docview').scrollTop = 0;
   requestAnimationFrame(initPads);   // холсты меряются только после показа
+  saveOrder(true);                   // документ оформлен — заказ ложится в архив сам
 }
 
 $('#bOut').onclick = () => { buildOuts(); $('#outs').classList.add('on'); };
 $('#bOutClose').onclick = () => $('#outs').classList.remove('on');
+$('#bArchClose').onclick = () => $('#arch').classList.remove('on');
+$('#aq').oninput = buildArch;
 $('#bFormClose').onclick = () => { $('#form').classList.remove('on'); $('#outs').classList.add('on'); };
 $('#bDocClose').onclick = () => $('#docview').classList.remove('on');
-$('#bPrint').onclick = () => window.print();
+// Перед печатью документ выставляется в ширину листа, измеряется
+// и масштабируется так, чтобы уместиться на одну страницу.
+const PAGE_H = 1047;        // 297 мм минус поля 2×10 мм, при 96 dpi
+const MIN_ZOOM = 0.5;       // ниже — уже нечитаемо, лучше отдать две страницы
+
+function fitAndPrint(){
+  const page = $('#docBody');
+  page.style.zoom = '';
+  document.body.classList.add('printing');
+  requestAnimationFrame(() => {
+    const h = page.scrollHeight;
+    let z = h > PAGE_H ? PAGE_H/h : 1;
+    if (z < MIN_ZOOM) z = MIN_ZOOM;
+    page.style.zoom = z;
+    setTimeout(() => {
+      window.print();
+      setTimeout(unfit, 400);
+    }, 60);
+  });
+}
+function unfit(){
+  document.body.classList.remove('printing');
+  $('#docBody').style.zoom = '';
+}
+window.addEventListener('afterprint', unfit);
+$('#bPrint').onclick = fitAndPrint;
 
 // ---------- текст расчёта ----------
 async function shareText(){
@@ -850,6 +1245,7 @@ async function shareText(){
   }catch(e){ alert(s); }
 }
 
+initKnob();
 render();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
