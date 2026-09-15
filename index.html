@@ -2374,6 +2374,12 @@ async function shareText(){
   }catch(e){ alert(s); }
 }
 
+// Просим систему закрепить хранилище. Safari решает сам, окна не показывает;
+// запуск с домашнего экрана — один из признаков в его пользу.
+if (navigator.storage && navigator.storage.persist){
+  navigator.storage.persist().catch(()=>{});
+}
+
 initKnob();
 buildPad();
 openFiles();          // хранилище файлов — если не дадут, приложение живёт без фото
