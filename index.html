@@ -72,6 +72,11 @@ button{border:0;background:none;cursor:pointer}
 .sub b.cut{color:#7A4A12}
 
 /* ---------- поворотный регулятор ---------- */
+.accbar{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;align-items:center}
+.accbar .chip{border:1px solid #47545F;background:#222C35;color:#C7D5E0;border-radius:7px;
+  padding:6px 9px;font-size:12px;min-height:34px;display:inline-flex;align-items:center;gap:6px}
+.accbar .chip b{color:#F2B441;font-variant-numeric:tabular-nums}
+.accbar .chip.net b{color:#8FD694}
 .knobrow{display:flex;align-items:center;gap:13px;margin-top:11px}
 .knob{width:108px;height:108px;flex:none;touch-action:none;cursor:grab}
 .knob:active{cursor:grabbing}
@@ -106,6 +111,9 @@ button{border:0;background:none;cursor:pointer}
 .line-hint{font-size:11.5px;color:var(--muted);margin-top:6px}
 .wlab{font-size:11.5px;color:var(--muted)}
 .wsel{border:1px solid var(--hair);border-radius:7px;height:34px;padding:0 6px;background:#FBFCFC}
+.cost-edit{border:1px solid var(--hair);border-radius:7px;height:34px;width:78px;padding:0 8px;
+  text-align:right;background:#FFF6E5;font-variant-numeric:tabular-nums;-webkit-appearance:none}
+.cost-edit:focus{border-color:var(--signal);background:#fff;outline:none}
 .wnow{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .mini{border:1px solid var(--hair);border-radius:7px;height:34px;padding:0 9px;
   font-size:12.5px;color:var(--signal);background:#fff;font-variant-numeric:tabular-nums}
@@ -153,6 +161,25 @@ button{border:0;background:none;cursor:pointer}
 .opt.act .opt-t{color:var(--signal)}
 .none{padding:38px 22px;text-align:center;color:var(--muted)}
 
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding:11px 14px;background:var(--surface);
+  border-bottom:1px solid var(--hair)}
+.chip2{border:1px solid var(--hair);background:#fff;border-radius:8px;padding:8px 12px;
+  font-size:14px;min-height:38px}
+.chip2.on{background:var(--signal);color:#fff;border-color:var(--signal)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);
+  border-bottom:1px solid var(--hair)}
+.kpi{background:var(--surface);padding:11px 13px}
+.kpi i{display:block;font:normal 11px/1.2 inherit;color:var(--muted);margin-bottom:3px}
+.kpi b{display:block;font:600 19px/1.2 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.kpi b.good{color:#1B6E2B} .kpi b.bad{color:#9A3412}
+.tsec{padding:13px 14px 5px;font-size:12px;color:var(--muted);background:var(--bg)}
+.trow{display:flex;gap:10px;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:10px 14px;align-items:baseline}
+.trow span{flex:1;min-width:0;font-size:14px}
+.trow em{font-style:normal;font-size:12px;color:var(--muted)}
+.trow b{font:600 14px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dates{display:flex;gap:9px;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--hair)}
+.dates input{flex:1;border:1px solid var(--hair);border-radius:8px;padding:9px 10px;background:#FBFCFC}
 .fld{background:var(--surface);border-bottom:1px solid var(--hair);padding:9px 14px}
 .fld label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px}
 .fld input,.fld textarea{width:100%;border:1px solid var(--hair);border-radius:8px;
@@ -187,9 +214,12 @@ button{border:0;background:none;cursor:pointer}
 .docpage .sig>div{flex:1}
 .docpage .sigbox{border-bottom:1px solid #000;height:60px;margin:4px 0 2px;position:relative}
 .docpage .sigpad{width:100%;height:60px;display:block;touch-action:none;cursor:crosshair}
-.docpage .sigimg{max-height:56px;max-width:100%;display:block;margin-top:2px}
+.docpage .sigimg{max-height:112px;max-width:100%;display:block;
+  margin:-14px 0 -22px 26px;position:relative;z-index:1}
 .docpage .sigcap{font-size:8.6pt}
 .docpage .sig{margin-top:8px;gap:14px}
+.docpage .conf{font-size:8.2pt;line-height:1.22;text-align:justify;margin:5px 0 2px;
+  padding:4px 6px;border:1px solid #000;background:#F4F4F4}
 .docpage .sigclr{font-size:9pt;color:#0A6FB8;padding:2px 0;text-decoration:underline}
 .docpage .sighint{font-size:9pt;color:#555;margin-top:2px}
 .docpage .tot{margin:8px 0}
@@ -207,8 +237,9 @@ button{border:0;background:none;cursor:pointer}
   .docpage .terms h2{font-size:7.2pt}
   .docpage table{font-size:8.2pt;margin:3px 0}
   .docpage th,.docpage td{padding:1.5px 3px}
+  .docpage .conf{font-size:7.2pt;line-height:1.16}
   .docpage .sigbox{height:52px}
-  .docpage .sigimg{max-height:48px}
+  .docpage .sigimg{max-height:104px;margin:-12px 0 -20px 26px}
   /* нулевые поля страницы: так Safari не печатает адрес сайта и дату.
      Отступы вместо них заданы внутри .docpage */
   @page{size:A4;margin:0}
@@ -239,6 +270,8 @@ body.printing #docBody{width:718px;max-width:none}   /* 190 мм при 96 dpi *
         </div>
       </div>
 
+      <div class="accbar" id="accBar"></div>
+
       <div class="knobrow">
         <div class="knob" id="knob" role="slider" tabindex="0" aria-label="Размер скидки"
              aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="без скидки"></div>
@@ -255,7 +288,7 @@ body.printing #docBody{width:718px;max-width:none}   /* 190 мм при 96 dpi *
 </div>
 
 <div class="bar"><div class="bar-in">
-  <button class="btn btn-ghost" id="bNew">Новый</button>
+  <button class="btn btn-ghost" id="bMenu" aria-label="Меню">☰</button>
   <button class="btn btn-main" id="bAdd">Добавить услугу</button>
   <button class="btn btn-ghost" id="bOut">Оформить</button>
 </div></div>
@@ -291,6 +324,42 @@ body.printing #docBody{width:718px;max-width:none}   /* 190 мм при 96 dpi *
     <button class="btn btn-ghost" id="bFormClose">Готово</button>
   </div></div>
   <div class="sheet-body"><div class="sheet-body-in" id="formBody"></div></div>
+</div>
+
+<!-- меню -->
+<div class="sheet" id="menu">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Меню</span>
+    <button class="btn btn-ghost" id="bMenuClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="menuBody"></div></div>
+</div>
+
+<!-- учёт заказа -->
+<div class="sheet" id="acct">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Учёт заказа</span>
+    <button class="btn btn-ghost" id="bAcctClose">Готово</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="acctBody"></div></div>
+</div>
+
+<!-- источники и ставки -->
+<div class="sheet" id="srcs">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Источники и ставки</span>
+    <button class="btn btn-ghost" id="bSrcClose">Готово</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="srcBody"></div></div>
+</div>
+
+<!-- аналитика -->
+<div class="sheet" id="anal">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Аналитика</span>
+    <button class="btn btn-ghost" id="bAnalClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="analBody"></div></div>
 </div>
 
 <!-- архив заказов -->
@@ -497,7 +566,8 @@ const W_OPTS = [['','авто'],['0','без гар.'],['14','14 дн'],['30','3
                 ['60','60 дн'],['90','90 дн'],['180','180 дн'],['365','365 дн']];
 
 const nameOf = l => (l.c || l.p) ? l.t : svcs[l.i].t;
-const catOf  = l => l.p ? ('Деталь · '+pcats[l.pc]) : (l.c ? 'Своя позиция' : short[svcs[l.i].c]);
+const catOf  = l => l.p ? ('Деталь · ' + (l.pc >= 0 ? pcats[l.pc] : 'своя'))
+                       : (l.c ? 'Своя работа' : short[svcs[l.i].c]);
 
 function priceText(s){
   if (s.k==='z') return 'бесплатно';
@@ -534,6 +604,17 @@ function render(){
   const t = totals();
   $('#total').innerHTML = segRender(t.net);
   paintKnob();
+  const mm = curMoney();
+  const srcName = (sources[acc.src]||{n:'—'}).n;
+  const srcRate = (sources[acc.src]||{r:0}).r;
+  $('#accBar').innerHTML =
+    '<span class="chip">Источник: <b></b></span>'+
+    (mm.comm ? '<span class="chip">Комиссия '+srcRate+'%: <b>−'+fmt(mm.comm)+' ₽</b></span>' : '')+
+    (mm.partsCost ? '<span class="chip">Детали: <b>−'+fmt(mm.partsCost)+' ₽</b></span>' : '')+
+    (mm.extra ? '<span class="chip">Доп.: <b>+'+fmt(mm.extra)+' ₽</b></span>' : '')+
+    (estimate ? '<span class="chip">Смета от '+estimate.at+': <b>'+fmt(estMoney().net)+' ₽</b></span>' : '')+
+    '<span class="chip net">Чистыми: <b>'+fmt(mm.profit)+' ₽</b></span>';
+  $('#accBar').querySelector('b').textContent = srcName;
   $('#mCount').textContent = order.length;
   $('#mGross').textContent = fmt(t.gross)+' ₽';
   $('#mCut').textContent = (t.cut?'−':'')+fmt(t.cut)+' ₽';
@@ -559,6 +640,9 @@ function render(){
           '<div class="line-sum">'+fmt(l.price*l.qty)+' ₽</div>'+
         '</div>'+
         '<div class="line-ctl" style="margin-top:7px">'+
+          (l.p ? '<label class="wlab">Себест.</label>'+
+                 '<input class="cost-edit" inputmode="numeric" value="'+fmt(+l.cost||0)+'" aria-label="Себестоимость">'+
+                 '<span class="mult">₽</span>' : '')+
           rangeBtns(l)+
           '<label class="wlab">Гарантия</label>'+
           '<select class="wsel">'+W_OPTS.map(([v,t]) =>
@@ -577,6 +661,11 @@ function render(){
     pe.onfocus = () => { pe.value = l.price; pe.select(); };
     pe.onblur = () => { const v=parseInt(String(pe.value).replace(/[^0-9]/g,''),10); l.price=isNaN(v)?0:v; render(); };
     el.querySelector('.wsel').onchange = e => { l.w = e.target.value===''?null:e.target.value; render(); };
+    const ce = el.querySelector('.cost-edit');
+    if (ce){
+      ce.onfocus = () => { ce.value = +l.cost||0; ce.select(); };
+      ce.onblur  = () => { const v=parseInt(String(ce.value).replace(/[^0-9]/g,''),10); l.cost=isNaN(v)?0:v; render(); };
+    }
     el.querySelectorAll('[data-set]').forEach(b => {
       b.onclick = () => { l.price = +b.dataset.set; render(); };
     });
@@ -699,7 +788,7 @@ function partRow(i, withCat){
                 '</div><div class="opt-p">'+(p.w?'гар. '+p.w+' дн.':'—')+'</div>';
   b.querySelector('.opt-t').textContent = p.t;
   b.onclick = () => {
-    order.push({p:true, pc:p.c, t:p.t, price:0, qty:1, w:String(p.w)});
+    order.push({p:true, pc:p.c, t:p.t, price:0, qty:1, cost:0, w:String(p.w)});
     render();
     b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),320);
   };
@@ -707,12 +796,15 @@ function partRow(i, withCat){
 }
 
 function addCustom(){
-  const t = prompt('Название позиции (запчасть, материал):');
+  const asPart = (mode === 'part');
+  const t = prompt(asPart ? 'Название детали или материала:' : 'Название работы или услуги:');
   if (!t) return;
-  const p = prompt('Цена за единицу, ₽:', '0');
+  const p = prompt('Цена для клиента за единицу, ₽:', '0');
   if (p === null) return;
   const v = parseInt(String(p).replace(/[^0-9]/g,''),10);
-  order.push({c:true, t:t.trim(), price:isNaN(v)?0:v, qty:1, w:null});
+  const row = {c:true, t:t.trim(), price:isNaN(v)?0:v, qty:1, w:null};
+  if (asPart){ row.p = true; row.pc = -1; row.cost = 0; }
+  order.push(row);
   render();
 }
 
@@ -727,10 +819,85 @@ $('#tabPart').onclick = () => {
 $('#q').oninput = drawList;
 $('#bAdd').onclick = () => { openCat=null; $('#q').value=''; drawList(); $('#sheet').classList.add('on'); };
 $('#bDone').onclick = () => $('#sheet').classList.remove('on');
-$('#bNew').onclick = () => {
-  if (order.length && !confirm('Очистить заказ и начать заново?')) return;
-  order=[]; discount=0; dsel.value=0; curId=null; render();
-};
+
+
+
+
+// ---------- смета, зафиксированная до выезда ----------
+// Раздел 3 заказ-наряда печатает её, раздел 4 — фактический список.
+// Пока смета не зафиксирована, обе таблицы одинаковые.
+let estimate = null;     // {lines, discount, at}
+
+function fixEstimate(){
+  if (!order.length){ alert('Заказ пуст — нечего фиксировать.'); return; }
+  estimate = {lines: JSON.parse(JSON.stringify(order)), discount, at: today()};
+  alert('Смета зафиксирована: ' + order.length + ' поз. на ' + fmt(totals().net) + ' ₽.\n' +
+        'Теперь можно добавлять работы — в разделе 3 останется исходная смета.');
+  render();
+}
+function clearEstimate(){
+  estimate = null;
+  alert('Смета сброшена. Оба раздела снова показывают текущий список.');
+  render();
+}
+function estMoney(){
+  if (!estimate) return totals();
+  const g = estimate.lines.reduce((a,l)=>a+l.price*l.qty,0);
+  const c = Math.round(g*(estimate.discount||0)/100);
+  return {gross:g, cut:c, net:g-c};
+}
+
+// ---------- источники заказов и ставки ----------
+const SRCKEY = 'sources.v1';
+const DEF_SRC = [
+  {n:'Прямой заказ', r:0},
+  {n:'Сарафанное радио', r:0},
+];
+let sources = DEF_SRC.slice();
+function loadSources(){
+  try{
+    const raw = localStorage.getItem(SRCKEY);
+    if (raw) sources = JSON.parse(raw);
+  }catch(e){}
+}
+function saveSources(){
+  try{ localStorage.setItem(SRCKEY, JSON.stringify(sources)); return true; }catch(e){ return false; }
+}
+loadSources();
+
+const ORDER_TYPES = ['ПК','ТВ','ПРИНТЕР','ГАРАНТИЯ','РОУТЕРЫ'];
+
+// учётные поля текущего заказа
+let acc = { src: 0, types: [], extra: 0 };
+function resetAcc(){ acc = { src: 0, types: [], extra: 0 }; }
+
+// ---------- расчёт денег по заказу ----------
+// Комиссия агрегатора берётся только с работ; детали в базу не входят.
+// Скидка уменьшает работы пропорционально, поэтому процент считается
+// от той суммы за работы, которую реально заплатил клиент.
+function money(lines, disc, srcRate, extra){
+  let works = 0, partsSale = 0, partsCost = 0;
+  (lines||[]).forEach(l => {
+    const sum = l.price*l.qty;
+    if (l.p){ partsSale += sum; partsCost += (+l.cost||0)*l.qty; }
+    else     { works += sum; }
+  });
+  const gross = works + partsSale;
+  const k = 1 - (disc||0)/100;
+  const worksNet = works * k;
+  const net = gross * k;
+  const comm = Math.round(worksNet * (srcRate||0) / 100);
+  const ex = +extra || 0;
+  const revenue = net + ex;                      // оборот
+  const profit  = net + ex - comm - partsCost;   // чистыми
+  return {works, partsSale, partsCost, gross, worksNet:Math.round(worksNet),
+          net:Math.round(net), comm, extra:ex,
+          revenue:Math.round(revenue), profit:Math.round(profit)};
+}
+function curMoney(){
+  const sr = sources[acc.src] ? sources[acc.src].r : 0;
+  return money(order, discount, sr, acc.extra);
+}
 
 // ---------- архив заказов ----------
 // Хранится в самом телефоне. Если браузер запретил хранилище,
@@ -755,6 +922,8 @@ let curId = null;      // id открытого/сохранённого зак�
 
 function snapshot(){
   const t = totals();
+  const src = sources[acc.src] || {n:'—', r:0};
+  const m = money(order, discount, src.r, acc.extra);
   return {
     id: curId || Date.now(),
     saved: new Date().toISOString(),
@@ -762,6 +931,10 @@ function snapshot(){
     client: C.client || '', phone: C.phone || '',
     device: C.device || '', docNo: C.docNo || '',
     total: t.net, gross: t.gross, discount,
+    src: {n: src.n, r: src.r},
+    types: acc.types.slice(),
+    extra: acc.extra || 0,
+    m,                                   // посчитанные деньги на момент сохранения
     lines: JSON.parse(JSON.stringify(order)),
     fields: JSON.parse(JSON.stringify(C)),
   };
@@ -784,6 +957,10 @@ function openOrder(rec){
   dsel.value = discount;
   Object.keys(C).forEach(k => delete C[k]);
   Object.assign(C, rec.fields || {});
+  acc.extra = rec.extra || 0;
+  acc.types = (rec.types || []).slice();
+  const si = sources.findIndex(x => x.n === (rec.src && rec.src.n));
+  acc.src = si >= 0 ? si : 0;
   curId = rec.id;
   render();
   $('#arch').classList.remove('on');
@@ -838,6 +1015,109 @@ function buildArch(){
   });
 }
 
+
+// ---------- учёт заказа ----------
+function buildAcct(){
+  const box = $('#acctBody');
+  box.innerHTML = '';
+
+  const g1 = document.createElement('div'); g1.className='grp'; g1.textContent='Источник заказа';
+  box.appendChild(g1);
+  const f1 = document.createElement('div'); f1.className='fld';
+  f1.innerHTML = '<label for="accSrc">Откуда пришёл заказ</label><select id="accSrc" style="width:100%;'+
+    'border:1px solid var(--hair);border-radius:8px;padding:10px;background:#FBFCFC"></select>';
+  box.appendChild(f1);
+  const sel = f1.querySelector('#accSrc');
+  sources.forEach((x,i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = x.n + (x.r ? '  —  ' + x.r + '%' : '  —  без комиссии');
+    if (i === acc.src) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = e => { acc.src = +e.target.value; render(); buildAcct(); };
+
+  const g2 = document.createElement('div'); g2.className='grp'; g2.textContent='Тип заказа';
+  box.appendChild(g2);
+  const ch = document.createElement('div'); ch.className='chips';
+  ORDER_TYPES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'chip2' + (acc.types.includes(t) ? ' on' : '');
+    b.textContent = t;
+    b.onclick = () => {
+      const i = acc.types.indexOf(t);
+      if (i >= 0) acc.types.splice(i,1); else acc.types.push(t);
+      buildAcct();
+    };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+
+  const g3 = document.createElement('div'); g3.className='grp'; g3.textContent='Дополнительно';
+  box.appendChild(g3);
+  const f2 = document.createElement('div'); f2.className='fld';
+  f2.innerHTML = '<label for="accExtra">Доход мимо агрегатора, ₽</label>'+
+    '<input id="accExtra" inputmode="numeric" value="'+(acc.extra||'')+'">';
+  box.appendChild(f2);
+  f2.querySelector('#accExtra').onblur = e => {
+    const v = parseInt(String(e.target.value).replace(/[^0-9]/g,''),10);
+    acc.extra = isNaN(v) ? 0 : v; render();
+  };
+
+  const m = curMoney();
+  const sum = document.createElement('div');
+  sum.className = 'kpis';
+  sum.innerHTML =
+    kpi('Работы', m.works) + kpi('Детали (продажа)', m.partsSale) +
+    kpi('Себестоимость деталей', m.partsCost, 'bad') +
+    kpi('Комиссия', m.comm, 'bad') +
+    kpi('Оборот', m.revenue) + kpi('Чистыми', m.profit, 'good');
+  box.appendChild(sum);
+}
+const kpi = (label, val, cls) =>
+  '<div class="kpi"><i>'+label+'</i><b'+(cls?' class="'+cls+'"':'')+'>'+fmt(val)+' ₽</b></div>';
+
+// ---------- источники и ставки ----------
+function buildSrc(){
+  const box = $('#srcBody');
+  box.innerHTML = '';
+  sources.forEach((x,i) => {
+    const d = document.createElement('div'); d.className='fld';
+    d.innerHTML =
+      '<div style="display:flex;gap:9px;align-items:flex-end">'+
+        '<div style="flex:1"><label>Название</label><input class="sn" value=""></div>'+
+        '<div style="width:92px"><label>Ставка, %</label><input class="sr2" inputmode="decimal" value="'+x.r+'"></div>'+
+        '<button class="line-del" aria-label="Удалить">×</button>'+
+      '</div>';
+    d.querySelector('.sn').value = x.n;
+    d.querySelector('.sn').onblur = e => { x.n = e.target.value.trim() || 'Без названия'; saveSources(); render(); };
+    d.querySelector('.sr2').onblur = e => {
+      const v = parseFloat(String(e.target.value).replace(',','.'));
+      x.r = isNaN(v) ? 0 : Math.max(0, Math.min(100, v));
+      saveSources(); e.target.value = x.r; render();
+    };
+    d.querySelector('.line-del').onclick = () => {
+      if (sources.length === 1){ alert('Должен остаться хотя бы один источник.'); return; }
+      if (!confirm('Удалить источник «'+x.n+'»?')) return;
+      sources.splice(i,1);
+      if (acc.src >= sources.length) acc.src = 0;
+      saveSources(); buildSrc(); render();
+    };
+    box.appendChild(d);
+  });
+  const add = document.createElement('button');
+  add.className = 'opt act';
+  add.innerHTML = '<div class="opt-main"><div class="opt-t">+ Добавить источник</div>'+
+                  '<div class="opt-s">Агрегатор, площадка или свой канал</div></div>';
+  add.onclick = () => { sources.push({n:'Новый источник', r:0}); saveSources(); buildSrc(); };
+  box.appendChild(add);
+  const note = document.createElement('div');
+  note.className = 'none';
+  note.style.textAlign = 'left';
+  note.textContent = 'Ставка применяется только к работам — стоимость деталей в базу для комиссии не входит. '+
+                     'Изменение ставки не меняет уже сохранённые заказы: в них записан процент, действовавший на момент сохранения.';
+  box.appendChild(note);
+}
+
 // ---------- данные клиента ----------
 const FIELDS = [
   ['g','Документ'],
@@ -887,19 +1167,412 @@ function buildForm(){
   });
 }
 
+
+// Минимальный генератор .xlsx без библиотек: zip без сжатия (метод store).
+// Нужен, потому что приложение обязано работать офлайн — подключить SheetJS нельзя.
+
+const CRC = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++){
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes){
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+const enc = s => new TextEncoder().encode(s);
+
+function zipStore(files){        // files: [{name, data:Uint8Array}]
+  const parts = [], central = [];
+  let offset = 0;
+
+  for (const f of files){
+    const nameB = enc(f.name), crc = crc32(f.data), len = f.data.length;
+    const lf = new Uint8Array(30 + nameB.length);
+    const dv = new DataView(lf.buffer);
+    dv.setUint32(0, 0x04034b50, true);
+    dv.setUint16(4, 20, true);      // version
+    dv.setUint16(6, 0x0800, true);  // UTF-8 имена
+    dv.setUint16(8, 0, true);       // store
+    dv.setUint16(10, 0, true); dv.setUint16(12, 0x21, true);  // время/дата — фиктивные
+    dv.setUint32(14, crc, true);
+    dv.setUint32(18, len, true);
+    dv.setUint32(22, len, true);
+    dv.setUint16(26, nameB.length, true);
+    dv.setUint16(28, 0, true);
+    lf.set(nameB, 30);
+    parts.push(lf, f.data);
+
+    const cd = new Uint8Array(46 + nameB.length);
+    const cv = new DataView(cd.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint16(12, 0, true); cv.setUint16(14, 0x21, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, len, true);
+    cv.setUint32(24, len, true);
+    cv.setUint16(28, nameB.length, true);
+    cv.setUint32(42, offset, true);
+    cd.set(nameB, 46);
+    central.push(cd);
+
+    offset += lf.length + len;
+  }
+
+  const cdSize = central.reduce((a, c) => a + c.length, 0);
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, offset, true);
+
+  const all = [...parts, ...central, end];
+  const total = all.reduce((a, b) => a + b.length, 0);
+  const out = new Uint8Array(total);
+  let p = 0;
+  for (const b of all){ out.set(b, p); p += b.length; }
+  return out;
+}
+
+const xesc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const colName = i => {
+  let s = '';
+  i++;
+  while (i > 0){ const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = (i - m - 1) / 26; }
+  return s;
+};
+
+// rows: массив массивов. Значение — число, строка, или {v, b:true} для жирного
+function sheetXml(rows, widths){
+  let cols = '';
+  if (widths && widths.length){
+    cols = '<cols>' + widths.map((w, i) =>
+      `<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('') + '</cols>';
+  }
+  const body = rows.map((r, ri) => {
+    const cells = r.map((c, ci) => {
+      const ref = colName(ci) + (ri + 1);
+      if (c === null || c === undefined || c === '') return '';
+      const bold = (typeof c === 'object' && c.b);
+      const val = (typeof c === 'object') ? c.v : c;
+      const style = bold ? ' s="1"' : (typeof val === 'number' ? ' s="2"' : '');
+      if (typeof val === 'number')
+        return `<c r="${ref}"${style}><v>${val}</v></c>`;
+      return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xesc(val)}</t></is></c>`;
+    }).join('');
+    return `<row r="${ri+1}">${cells}</row>`;
+  }).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${cols}<sheetData>${body}</sheetData></worksheet>`;
+}
+
+function buildXlsx(sheets){       // sheets: [{name, rows, widths}]
+  const files = [];
+  const n = sheets.length;
+
+  files.push({name:'[Content_Types].xml', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+${sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+</Types>`)});
+
+  files.push({name:'_rels/.rels', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`)});
+
+  files.push({name:'xl/workbook.xml', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheets>${sheets.map((s,i)=>`<sheet name="${xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>
+</workbook>`)});
+
+  files.push({name:'xl/_rels/workbook.xml.rels', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}
+<Relationship Id="rId${n+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`)});
+
+  files.push({name:'xl/styles.xml', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0"/></numFmts>
+<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>
+<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>
+<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="3">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`)});
+
+  sheets.forEach((s, i) => {
+    files.push({name:`xl/worksheets/sheet${i+1}.xml`, data: enc(sheetXml(s.rows, s.widths))});
+  });
+
+  return zipStore(files);
+}
+
+
+
+// ---------- выгрузка отчёта ----------
+function exportXlsx(a){
+  const H = v => ({v, b:true});
+  const per = PERIODS.find(p => p[0]===period);
+  const head = [
+    ['Отчёт по заказам'],
+    ['Период', per ? per[1] : '', a.from.toLocaleDateString('ru-RU') + ' — ' +
+      new Date(a.to.getTime()-86400000).toLocaleDateString('ru-RU')],
+    ['Сформирован', new Date().toLocaleString('ru-RU')],
+    [],
+  ];
+
+  const orders = [
+    ...head,
+    [H('Дата'),H('Клиент'),H('Телефон'),H('Техника'),H('Источник'),H('Ставка, %'),
+     H('Тип'),H('Работы'),H('Детали, продажа'),H('Скидка, %'),H('Доп. доход'),
+     H('Оборот'),H('Комиссия'),H('Себест. деталей'),H('Чистыми')],
+  ];
+  a.rows.forEach(r => {
+    const m = recMoney(r);
+    orders.push([
+      r.date, r.client||'', r.phone||'', r.device||'',
+      (r.src&&r.src.n)||'—', (r.src&&r.src.r)||0,
+      (r.types||[]).join(', '),
+      m.works, m.partsSale, r.discount||0, m.extra,
+      m.revenue, m.comm, m.partsCost, m.profit,
+    ]);
+  });
+  orders.push([]);
+  orders.push([H('ИТОГО'),'','','','','','',
+    a.agg.works, a.agg.partsSale, '', a.agg.extra,
+    a.agg.revenue, a.agg.comm, a.agg.partsCost, a.agg.profit]);
+
+  const totals = [
+    ...head,
+    [H('Показатель'), H('Значение')],
+    ['Заказов', a.rows.length],
+    ['Оборот', a.agg.revenue],
+    ['Средний чек', a.avg],
+    ['Работы', a.agg.works],
+    ['Детали (продажа)', a.agg.partsSale],
+    ['Себестоимость деталей', a.agg.partsCost],
+    ['Комиссия агрегаторов', a.agg.comm],
+    ['Доход мимо агрегаторов', a.agg.extra],
+    ['Чистый доход', a.agg.profit],
+  ];
+
+  const bySrc = [...head, [H('Источник'),H('Заказов'),H('Оборот'),H('Комиссия'),H('Чистыми')]];
+  Object.entries(a.bySrc).sort((x,y)=>y[1].revenue-x[1].revenue)
+    .forEach(([n,v]) => bySrc.push([n, v.n, v.revenue, v.comm, v.profit]));
+
+  const byType = [...head, [H('Тип'),H('Заказов'),H('Оборот')]];
+  Object.entries(a.byType).sort((x,y)=>y[1].revenue-x[1].revenue)
+    .forEach(([n,v]) => byType.push([n, v.n, v.revenue]));
+
+  const data = buildXlsx([
+    {name:'Заказы',       rows:orders, widths:[11,20,15,18,16,9,14,10,13,9,11,11,11,13,11]},
+    {name:'Итоги',        rows:totals, widths:[26,14]},
+    {name:'По источникам',rows:bySrc,  widths:[22,10,12,12,12]},
+    {name:'По типам',     rows:byType, widths:[18,10,12]},
+  ]);
+
+  const name = 'Отчёт_' + new Date().toISOString().slice(0,10) + '.xlsx';
+  const blob = new Blob([data], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const file = (typeof File !== 'undefined') ? new File([blob], name, {type:blob.type}) : null;
+
+  if (file && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:name}).catch(()=>{});
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a2 = document.createElement('a');
+  a2.href = url; a2.download = name;
+  document.body.appendChild(a2); a2.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a2.remove(); }, 1500);
+}
+
+// ---------- аналитика ----------
+let period = 'month';
+let dFrom = '', dTo = '';
+
+function periodRange(){
+  const now = new Date();
+  const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (period === 'today') return [d0, new Date(d0.getTime()+86400000)];
+  if (period === 'week'){
+    const wd = (d0.getDay()+6)%7;                  // понедельник — начало недели
+    const from = new Date(d0.getTime() - wd*86400000);
+    return [from, new Date(d0.getTime()+86400000)];
+  }
+  if (period === 'month') return [new Date(now.getFullYear(), now.getMonth(), 1),
+                                  new Date(d0.getTime()+86400000)];
+  if (period === 'year')  return [new Date(now.getFullYear(), 0, 1),
+                                  new Date(d0.getTime()+86400000)];
+  const f = dFrom ? new Date(dFrom+'T00:00:00') : new Date(2000,0,1);
+  const t = dTo   ? new Date(dTo  +'T00:00:00') : d0;
+  return [f, new Date(t.getTime()+86400000)];
+}
+
+function recMoney(r){
+  // у старых записей учётных полей нет — считаем их прямыми заказами
+  if (r.m) return r.m;
+  return money(r.lines, r.discount, (r.src&&r.src.r)||0, r.extra||0);
+}
+
+function analData(){
+  if (!store) return null;
+  const [from, to] = periodRange();
+  const rows = store.filter(r => {
+    const d = new Date(r.saved);
+    return d >= from && d < to;
+  }).sort((a,b) => new Date(b.saved) - new Date(a.saved));
+
+  const agg = {revenue:0, profit:0, comm:0, partsCost:0, extra:0, works:0, partsSale:0};
+  const bySrc = {}, byType = {};
+  rows.forEach(r => {
+    const m = recMoney(r);
+    ['revenue','profit','comm','partsCost','extra','works','partsSale'].forEach(k => agg[k] += (m[k]||0));
+    const sn = (r.src && r.src.n) || 'Не указан';
+    bySrc[sn] = bySrc[sn] || {n:0, revenue:0, profit:0, comm:0};
+    bySrc[sn].n++; bySrc[sn].revenue += m.revenue; bySrc[sn].profit += m.profit; bySrc[sn].comm += m.comm;
+    const ts = (r.types && r.types.length) ? r.types : ['Без типа'];
+    ts.forEach(t => {
+      byType[t] = byType[t] || {n:0, revenue:0};
+      byType[t].n++; byType[t].revenue += m.revenue;
+    });
+  });
+  const avg = rows.length ? Math.round(agg.revenue/rows.length) : 0;
+  return {rows, agg, bySrc, byType, avg, from, to};
+}
+
+const PERIODS = [['today','Сегодня'],['week','Неделя'],['month','Месяц'],['year','Год'],['custom','Свой']];
+
+function buildAnal(){
+  const box = $('#analBody');
+  box.innerHTML = '';
+
+  const ch = document.createElement('div'); ch.className='chips';
+  PERIODS.forEach(([k,t]) => {
+    const b = document.createElement('button');
+    b.className = 'chip2' + (period===k ? ' on' : '');
+    b.textContent = t;
+    b.onclick = () => { period = k; buildAnal(); };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+
+  if (period === 'custom'){
+    const d = document.createElement('div'); d.className='dates';
+    d.innerHTML = '<input type="date" id="dF" value="'+dFrom+'"><input type="date" id="dT" value="'+dTo+'">';
+    box.appendChild(d);
+    d.querySelector('#dF').onchange = e => { dFrom = e.target.value; buildAnal(); };
+    d.querySelector('#dT').onchange = e => { dTo = e.target.value; buildAnal(); };
+  }
+
+  const a = analData();
+  if (!a){
+    box.insertAdjacentHTML('beforeend','<div class="none">Архив недоступен — телефон не разрешил хранить данные.</div>');
+    return;
+  }
+  if (!a.rows.length){
+    box.insertAdjacentHTML('beforeend','<div class="none">За этот период заказов нет.</div>');
+    return;
+  }
+
+  const k = document.createElement('div'); k.className='kpis';
+  k.innerHTML =
+    kpi('Оборот', a.agg.revenue) +
+    kpi('Чистыми', a.agg.profit, 'good') +
+    '<div class="kpi"><i>Заказов</i><b>'+a.rows.length+'</b></div>' +
+    kpi('Средний чек', a.avg) +
+    kpi('Комиссия агрегаторов', a.agg.comm, 'bad') +
+    kpi('Себестоимость деталей', a.agg.partsCost, 'bad');
+  box.appendChild(k);
+
+  if (a.agg.extra){
+    const e = document.createElement('div'); e.className='kpis';
+    e.innerHTML = kpi('Доход мимо агрегаторов', a.agg.extra) +
+                  kpi('Продажа деталей', a.agg.partsSale);
+    box.appendChild(e);
+  }
+
+  sec(box, 'По источникам');
+  Object.entries(a.bySrc).sort((x,y)=>y[1].revenue-x[1].revenue).forEach(([n,v]) => {
+    const r = document.createElement('div'); r.className='trow';
+    r.innerHTML = '<span></span><b>'+fmt(v.revenue)+' ₽</b>';
+    r.querySelector('span').innerHTML = '';
+    r.querySelector('span').append(n);
+    const em = document.createElement('em');
+    em.textContent = '  ·  ' + v.n + ' зак.' + (v.comm ? '  ·  комиссия ' + fmt(v.comm) + ' ₽' : '');
+    r.querySelector('span').appendChild(em);
+    box.appendChild(r);
+  });
+
+  sec(box, 'По типам');
+  Object.entries(a.byType).sort((x,y)=>y[1].revenue-x[1].revenue).forEach(([n,v]) => {
+    const r = document.createElement('div'); r.className='trow';
+    r.innerHTML = '<span></span><b>'+fmt(v.revenue)+' ₽</b>';
+    r.querySelector('span').textContent = n + '  ·  ' + v.n + ' зак.';
+    box.appendChild(r);
+  });
+
+  sec(box, 'Заказы за период');
+  a.rows.forEach(r => {
+    const m = recMoney(r);
+    const el = document.createElement('div'); el.className='trow';
+    el.innerHTML = '<span></span><b>'+fmt(m.revenue)+' ₽</b>';
+    el.querySelector('span').textContent =
+      r.date + '  ·  ' + (r.client || 'без имени') + '  ·  ' + ((r.src&&r.src.n)||'—');
+    box.appendChild(el);
+  });
+
+  const btn = document.createElement('div');
+  btn.style.padding = '16px 14px 30px';
+  btn.innerHTML = '<button class="btn btn-main" id="bXls" style="width:100%">Выгрузить в Excel</button>';
+  box.appendChild(btn);
+  btn.querySelector('#bXls').onclick = () => exportXlsx(a);
+}
+function sec(box, t){
+  const d = document.createElement('div'); d.className='tsec'; d.textContent = t; box.appendChild(d);
+}
+
 // ---------- документы ----------
 const fill = (v,w) => v && String(v).trim()
   ? '<span class="fill">'+esc(v)+'</span>'
   : '<span class="fill" style="min-width:'+(w||120)+'px">&nbsp;</span>';
 
-function rowsTable(cols){
+function rowsTable(cols, src){
+  const list = src || order;
   // cols: 'full' — №/наим/кол/цена/стоим/гарантия ; 'short' — №/наим/стоим/гарантия
   let h = '<table><tr>';
   h += cols==='full'
     ? '<th style="width:6%">№</th><th>Наименование услуг, деталей и материалов</th><th style="width:9%">Кол-во</th><th style="width:13%">Цена</th><th style="width:14%">Стоимость</th><th style="width:13%">Гарантия, дней</th>'
     : '<th style="width:6%">№</th><th>Наименование услуг, деталей и материалов</th><th style="width:18%">Стоимость, руб.</th><th style="width:15%">Гарантия</th>';
   h += '</tr>';
-  order.forEach((l,i) => {
+  list.forEach((l,i) => {
     const sum = l.price*l.qty, w = warranty(l);
     h += '<tr><td class="n">'+(i+1)+'</td><td>'+esc(nameOf(l))+'</td>';
     h += cols==='full'
@@ -907,7 +1580,7 @@ function rowsTable(cols){
       : '<td class="r">'+fmt(sum)+'</td><td class="c">'+(w?w+' дн.':'—')+'</td>';
     h += '</tr>';
   });
-  const need = order.length ? 0 : 3;   // пустые строки только для незаполненного бланка
+  const need = list.length ? 0 : 3;   // пустые строки только для незаполненного бланка
   for (let i=0;i<need;i++)
     h += '<tr><td class="n">&nbsp;</td><td></td><td></td><td></td>'+(cols==='full'?'<td></td><td></td>':'')+'</tr>';
   return h + '</table>';
@@ -988,7 +1661,10 @@ const EXEC = 'Самозанятый Савинов Дмитрий Владим�
 
 function docNaryad(){
   const t = totals();
-  const tbl = rowsTable('short');
+  const e = estMoney();
+  const tblEst = rowsTable('short', estimate ? estimate.lines : null);
+  const tblAct = rowsTable('short');
+  const changed = !!estimate;
   return `
 <h1>ДОГОВОР-ЗАКАЗ-НАРЯД № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</h1>
 <p><b>Исполнитель:</b> ${EXEC}</p>
@@ -1003,36 +1679,43 @@ function docNaryad(){
 
 <div class="terms"><h2>2. УСЛОВИЯ ОКАЗАНИЯ УСЛУГ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h2>
 <p>2.1. Срок выполнения работ: от 1 до 14 рабочих дней. Срок может быть автоматически увеличен Исполнителем в одностороннем порядке в случаях: сложности/плавающего характера диагностики, отсутствия запчастей у поставщиков (на срок поставки), а также временной нетрудоспособности Исполнителя по состоянию здоровья.</p>
-<p>2.2. Связь и согласование: Все уведомления, согласование сметы и сроков производятся через мессенджеры (Telegram, WhatsApp) по номеру Заказчика или аудиозвонком в Telegram. Письменное подтверждение в мессенджере («Да», «Согласен») имеет полную юридическую силу (ст. 434 ГК РФ). При увеличении объема/стоимости работ Исполнитель досогласовывает изменения указанными средствами связи.</p>
+<p>2.2. Связь и согласование: Все уведомления, согласование сметы и сроков производятся телефонным звонком на номер Заказчика либо через мессенджеры MAX и Telegram. Письменное подтверждение в мессенджере («Да», «Согласен») имеет полную юридическую силу (ст. 434 ГК РФ). При увеличении объема/стоимости работ Исполнитель досогласовывает изменения указанными средствами связи.</p>
 <p>2.3. Предоплата и отказ от ремонта: В случае отказа Заказчика от ремонта после проведения диагностики или доставки техники, внесенная предоплата Заказчику не возвращается и удерживается Исполнителем в качестве компенсации фактически понесенных расходов (ст. 32 Закона РФ «О ЗПП», ст. 782 ГК РФ). Фиксированная стоимость диагностики/приема без транспортировки — 1 500 руб., с транспортировкой/доставкой — 2 500 руб.</p>
 <p>2.4. Ранее ремонтировавшаяся техника: Исполнитель не несет ответственности за скрытые дефекты, неработоспособность или выбытие из строя узлов, если техника ранее подвергалась ремонту, вмешательству третьих лиц, имеет следы неквалифицированного вскрытия, пайки или залития.</p>
 <p>2.5. Риски диагностики: При диагностике техники со скрытыми дефектами (микротрещины плат, межслойный обрыв, коррозия/залитие) возможно полное или частичное проявление скрытых неисправностей и выход техники из строя. Исполнитель не несет ответственности за изменение состояния техники в процессе диагностики, обусловленное естественным износом или скрытыми повреждениями (ст. 401 ГК РФ).</p>
 <p>2.6. Хранение и утилизация: При незаборе Оборудования Заказчиком в течение 30 календарных дней после уведомления о готовности/диагностике, начисляется плата за хранение — 100 руб./сутки. По истечении 60 дней Исполнитель вправе утилизировать Оборудование либо реализовать его в счет покрытия расходов (ст. 899 ГК РФ).</p>
 <p>2.7. Сохранность данных: Исполнитель не несет ответственности за сохранность ПО, персональных данных и информации на накопителях техники. Заказчик обязан самостоятельно создать резервную копию до сдачи техники.</p>
 <p>2.8. Персональные данные: Подписывая настоящий Договор, Заказчик дает согласие на обработку своих персональных данных (ФИО, телефон, адрес) в целях исполнения Договора (ФЗ № 152-ФЗ).</p>
+<p>2.9. Предмет и привлечение третьих лиц: Заказчик поручает, а Исполнитель обязуется выполнить работы по диагностике, ремонту, настройке и техническому обслуживанию Оборудования, указанные в разделе 3. Стоимость определяется Прейскурантом Исполнителя. Исполнитель вправе привлечь к исполнению третьих лиц, оставаясь ответственным перед Заказчиком за результат.</p>
+<p>2.10. Оплата: Заказчик оплачивает работы непосредственно после подписания Акта выполненных работ (раздел 4), за вычетом внесенной предоплаты.</p>
+<p>2.11. Ознакомление с расценками: До заключения Договора Заказчик ознакомился с Прейскурантом Исполнителя, перечнем работ, сроками и условиями предоставления гарантии в полном объеме.</p>
+<p>2.12. Недостатки при приемке: Обнаруженные Заказчиком при приемке недостатки фиксируются в Акте выполненных работ. Видимые недостатки, не отраженные в Акте, безвозмездному устранению не подлежат.</p>
+<p>2.13. Замененные детали: Заказчик дает согласие на оставление замененных деталей и расходных материалов Исполнителю, если иное прямо не указано в разделе 4.</p>
+<p>2.14. Гарантийный ремонт: Устранение недостатков по гарантии производится в срок не более 45 (сорока пяти) календарных дней с момента предоставления Заказчиком доступа к Оборудованию.</p>
 
 
-<h2>2.9. СОГЛАШЕНИЕ ОБ ЭЛЕКТРОННОЙ ПОДПИСИ</h2>
-<p>2.9.1. Стороны договорились, что настоящий документ, приложения и акты к нему могут подписываться простой электронной подписью в порядке, установленном ст. 160 ГК РФ, ст. 6 и ст. 9 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи».</p>
-<p>2.9.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
-<p>2.9.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
-<p>2.9.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
-<p>2.9.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (Telegram, WhatsApp) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
-<p>2.9.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+<h2>2.15. СОГЛАШЕНИЕ ОБ ЭЛЕКТРОННОЙ ПОДПИСИ</h2>
+<p>2.15.1. Стороны договорились, что настоящий документ, приложения и акты к нему могут подписываться простой электронной подписью в порядке, установленном ст. 160 ГК РФ, ст. 6 и ст. 9 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи».</p>
+<p>2.15.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
+<p>2.15.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
+<p>2.15.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
+<p>2.15.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (MAX, Telegram) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
+<p>2.15.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
 </div>
 <h2>3. СОГЛАСОВАНИЕ СМЕТЫ И СТОИМОСТИ (заполняется и подписывается ДО начала работ)</h2>
-${tbl}
-<p class="tot"><b>ОБЩАЯ СТОИМОСТЬ:</b> ${fill(fmt(t.net)+' руб.')}
+${tblEst}
+<p class="tot"><b>ОБЩАЯ СТОИМОСТЬ:</b> ${fill(fmt(e.net)+' руб.')}
 &nbsp; <b>Предоплата:</b> ${fill(C.prepay?fmt(+String(C.prepay).replace(/[^0-9]/g,''))+' руб.':'',90)}
 &nbsp; <b>Планируемый срок:</b> ${fill(C.term,50)} дней.</p>
-${t.cut ? '<p class="tot">В том числе скидка '+discount+'% — '+fmt(t.cut)+' руб. (сумма без скидки '+fmt(t.gross)+' руб.)</p>' : ''}
-<p>С условиями договора, прейскурантом, перечнем, сроками и стоимостью работ ознакомлен и согласен. На обработку ПДН согласен. Работы разрешаю.</p>
+${e.cut ? '<p class="tot">В том числе скидка — '+fmt(e.cut)+' руб. (сумма без скидки '+fmt(e.gross)+' руб.)</p>' : ''}
+<p class="conf"><b>Перед началом работ.</b> С Прейскурантом, перечнем, сроками и полной стоимостью работ ознакомлен. Стоимость мне понятна и со мной согласована до начала работ; возражений по цене не имею. Предупреждён о возможности выявления скрытых дефектов и о том, что при изменении объёма работ стоимость досогласовывается отдельно. На обработку персональных данных согласен. Работы разрешаю.</p>
 ${sigPair('Исполнитель (работы принял на диагностику):','Заказчик (работы разрешаю):','n1')}
 
 <h2>4. АКТ ВЫПОЛНЕННЫХ РАБОТ И ПРИЕМА-ПЕРЕДАЧИ ТЕХНИКИ (заполняется ПОСЛЕ ремонта)</h2>
-${tbl}
+${tblAct}
 <p class="tot"><b>ИТОГО К ОПЛАТЕ:</b> ${fill(fmt(t.net)+' руб.')}</p>
-<p>Работы выполнены в полном объеме, техника получена, претензий по объему, качеству и внешнему виду не имею.</p>
+${changed && t.net !== e.net ? '<p class="conf"><b>Изменение объёма работ.</b> В ходе выполнения выявлена необходимость работ, не вошедших в первоначальную смету раздела 3. Состав, стоимость и срок дополнительных работ согласованы с Заказчиком до их выполнения в порядке п. 2.2 Договора. Смета по разделу 3 составляла '+fmt(e.net)+' руб., итоговая стоимость — '+fmt(t.net)+' руб. Заказчик подтверждает согласование изменений и отсутствие возражений по итоговой сумме.</p>' : ''}
+<p class="conf"><b>После выполнения работ.</b> Работы выполнены в полном объёме и в согласованный срок. Результат проверен в моём присутствии. Претензий по объёму, качеству, срокам и стоимости работ не имею. Итоговая стоимость соответствует согласованной; скрытых и навязанных услуг не выявлено. Оборудование получено в исправном состоянии, внешних повреждений сверх указанных при приёмке нет.</p>
 ${sigPair('Исполнитель:','Заказчик:','n2','<div class="sigcap">Дата: «____» ____________ 2026 г.</div>')}`;
 }
 
@@ -1041,9 +1724,9 @@ function docRabot(){
 <h1>Договор на выполнение работ № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</h1>
 <p>Савинов Дмитрий Владимирович, зарегистрированный в ФНС в качестве налогоплательщика налога на профессиональный доход в соответствии с ФЗ от 27.11.2018 №422-ФЗ (ИНН 420217238281), именуемый в дальнейшем «<b>Исполнитель</b>», с одной стороны, и ${fill(C.client,240)}, именуемый в дальнейшем <b>Заказчик</b>, совместно именуемые Стороны, заключили настоящий Договор на следующих условиях:</p>
 
-<p>1.1. Заказчик поручает, а Исполнитель обязуется выполнить работы по мелкому бытовому ремонту, диагностике, ремонту, техническому обслуживанию бытовой техники (далее — Оборудование), указанные в п. 1.3 Договора. Заказчик обязуется принять результаты работ и оплатить их и/или запчасти и расходные материалы. Стоимость работ определяется в соответствии с Прейскурантом Исполнителя и указывается в настоящем договоре. Исполнитель вправе привлечь к исполнению своих обязательств других лиц, оставаясь ответственным перед Заказчиком за выполняемые такими третьими лицами работы.</p>
+<p>1.1. Заказчик поручает, а Исполнитель обязуется выполнить работы по диагностике, ремонту, настройке и техническому обслуживанию техники и оборудования — компьютеров, ноутбуков, телевизоров, смартфонов и планшетов, принтеров и МФУ, сетевого оборудования, а также иной электронной и бытовой техники (далее — Оборудование), указанные в п. 1.3 Договора. Заказчик обязуется принять результаты работ и оплатить их и/или запчасти и расходные материалы. Стоимость работ определяется в соответствии с Прейскурантом Исполнителя и указывается в настоящем договоре. Исполнитель вправе привлечь к исполнению своих обязательств других лиц, оставаясь ответственным перед Заказчиком за выполняемые такими третьими лицами работы.</p>
 
-<p>1.2. Работы на основании Договора выполняются в отношении следующего Оборудования <i>(в случае выполнения ремонта бытовой техники)</i>:</p>
+<p>1.2. Работы на основании Договора выполняются в отношении следующего Оборудования :</p>
 <table>
   <tr><th>Наименование оборудования</th><th>Характеристики</th><th>Цена оборудования</th><th>Неисправность со слов заказчика</th></tr>
   <tr><td>${esc(C.device||'')}&nbsp;</td><td>${esc(C.specs||'')}&nbsp;</td><td>${esc(C.devPrice||'')}&nbsp;</td><td>${esc(C.fault||'')}&nbsp;</td></tr>
@@ -1066,9 +1749,11 @@ ${moneyBlock()}
 <p>1.10.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
 <p>1.10.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
 <p>1.10.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
-<p>1.10.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (Telegram, WhatsApp) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
+<p>1.10.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (MAX, Telegram) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
 <p>1.10.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
 </div>
+<p class="conf"><b>Перед началом работ.</b> С Прейскурантом, перечнем, сроками и полной стоимостью работ ознакомлен. Стоимость мне понятна и со мной согласована до начала работ; возражений по цене не имею. Предупреждён о возможности выявления скрытых дефектов и о том, что при изменении объёма работ стоимость досогласовывается отдельно. На обработку персональных данных согласен. Работы разрешаю.</p>
+<p class="conf"><b>После выполнения работ.</b> Работы выполнены в полном объёме и в согласованный срок. Результат проверен в моём присутствии. Претензий по объёму, качеству, срокам и стоимости работ не имею. Итоговая стоимость соответствует согласованной; скрытых и навязанных услуг не выявлено. Оборудование получено в исправном состоянии, внешних повреждений сверх указанных при приёмке нет.</p>
 <h2>РЕКВИЗИТЫ СТОРОН</h2>
 <table>
   <tr><th style="width:50%">Исполнитель</th><th>Заказчик</th></tr>
@@ -1096,7 +1781,7 @@ function docTalon(){
 ${rowsTable('short')}
 <div class="terms"><p>1.2. Перечень выполненных работ и установленных деталей, на которые распространяется гарантия, указывается в Договоре-Заказ-наряде.</p>
 <p>1.3. Гарантийное обслуживание предоставляется только при условии сохранности и предъявления оригиналов Договора-Заказ-наряда и настоящего Гарантийного талона.</p>
-<p>1.4. При заявлении о гарантийном случае Исполнитель обязуется прибыть к Заказчику (либо принять технику) для проведения диагностики и устранения недостатков в срок до 10 (десяти) рабочих дней с момента получения письменного обращения (через Telegram/WhatsApp).</p>
+<p>1.4. При заявлении о гарантийном случае Исполнитель обязуется прибыть к Заказчику (либо принять технику) для проведения диагностики и устранения недостатков в срок до 10 (десяти) рабочих дней с момента получения обращения (телефонный звонок либо мессенджеры MAX, Telegram).</p>
 
 <h2>2. ГАРАНТИЙНЫЕ ПЛОМБЫ И ОСНОВАНИЯ ДЛЯ ОТКАЗА В ГАРАНТИИ</h2>
 <p>2.1. <b>Контроль целостности:</b> На отремонтированные узлы и корпус Оборудования Исполнитель наносит защитные гарантийные пломбы (стикеры).</p>
@@ -1122,7 +1807,7 @@ ${rowsTable('short')}
 <p>4.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
 <p>4.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
 <p>4.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
-<p>4.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (Telegram, WhatsApp) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
+<p>4.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (MAX, Telegram) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
 <p>4.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
 </div>
 <p>С условиями гарантийного обслуживания, правилами эксплуатации и порядком оплаты негарантийных вызовов ознакомлен и согласен. Пломбы проверены, целостность подтверждаю.</p>
@@ -1151,19 +1836,57 @@ ${moneyBlock()}
 <p>4. Срок выполнения работ по Договору продлевается на ${fill(C.extraDays,45)} рабочих дней с момента подписания настоящего соглашения.</p>
 <p>5. Гарантийные сроки на дополнительные работы и детали указаны в таблице п. 1 настоящего соглашения и исчисляются с даты подписания Акта выполненных работ.</p>
 <p>6. Заказчик подтверждает, что необходимость дополнительных работ, их состав, стоимость и срок с ним согласованы до начала их выполнения. Возражений не имеет, работы разрешает.</p>
-<p>7. Остальные условия Договора-Заказ-наряда остаются неизменными. Настоящее соглашение является неотъемлемой частью Договора, составлено в двух экземплярах и подписывается в порядке, установленном п. 2.9 Договора (простая электронная подпись).</p>
+<p>7. Остальные условия Договора-Заказ-наряда остаются неизменными. Настоящее соглашение является неотъемлемой частью Договора, составлено в двух экземплярах и подписывается в порядке, установленном п. 2.15 Договора (простая электронная подпись).</p>
 
 ${sigPair('Исполнитель:','Заказчик (работы разрешаю):','d1')}`;
+}
+
+
+// ---------- меню ----------
+const MENU = [
+  ['Новый заказ', 'Очистить расчёт и начать заново', () => {
+      if (order.length && !confirm('Очистить заказ и начать заново?')) return;
+      order=[]; discount=0; dsel.value=0; curId=null; resetAcc(); estimate=null; render();
+      $('#menu').classList.remove('on');
+  }],
+  ['Учёт заказа', 'Источник, тип, доход мимо агрегатора', () => {
+      $('#menu').classList.remove('on'); buildAcct(); $('#acct').classList.add('on');
+  }],
+  ['Зафиксировать смету', 'Запомнить состав до выезда — для раздела 3 заказ-наряда', () => {
+      $('#menu').classList.remove('on');
+      estimate ? (confirm('Смета уже зафиксирована ('+estimate.at+'). Сбросить её?') ? clearEstimate() : null)
+               : fixEstimate();
+  }],
+  ['Аналитика', 'Оборот, доход, средний чек, отчёт в Excel', () => {
+      $('#menu').classList.remove('on'); buildAnal(); $('#anal').classList.add('on');
+  }],
+  ['Архив заказов', 'Открыть или повторить прошлый заказ', () => {
+      $('#menu').classList.remove('on'); $('#aq').value=''; buildArch(); $('#arch').classList.add('on');
+  }],
+  ['Источники и ставки', 'Агрегаторы и проценты комиссии', () => {
+      $('#menu').classList.remove('on'); buildSrc(); $('#srcs').classList.add('on');
+  }],
+];
+function buildMenu(){
+  const box = $('#menuBody');
+  box.innerHTML = '';
+  MENU.forEach(([t,sub,fn]) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<div class="opt-main"><div class="opt-t">'+t+'</div><div class="opt-s">'+sub+'</div></div>';
+    b.onclick = fn;
+    box.appendChild(b);
+  });
 }
 
 // ---------- оформить ----------
 const OUTS = [
   ['Данные клиента', 'ФИО, техника, адрес — подставятся во все документы', () => { $('#outs').classList.remove('on'); buildForm(); $('#form').classList.add('on'); }],
   ['Расчёт текстом', 'Скопировать или отправить в мессенджер', shareText],
+  ['Учёт заказа', 'Источник, тип, доход мимо агрегатора', () => {
+      $('#outs').classList.remove('on'); buildAcct(); $('#acct').classList.add('on'); }],
   ['Сохранить заказ', 'Положить текущий расчёт в архив на телефоне', () => saveOrder(false)],
-  ['Архив заказов', 'Открыть или повторить прошлый заказ', () => {
-      $('#outs').classList.remove('on'); $('#aq').value=''; buildArch(); $('#arch').classList.add('on');
-  }],
+
   ['Договор-заказ-наряд', 'Приёмка техники, смета и акт выполненных работ', () => openDoc(docNaryad)],
   ['Договор на выполнение работ', 'Работы на месте, со скидкой и авансом', () => openDoc(docRabot)],
   ['Дополнительное соглашение', 'Если после согласования добавились работы', () => openDoc(docDop)],
@@ -1194,6 +1917,11 @@ function openDoc(builder){
 
 $('#bOut').onclick = () => { buildOuts(); $('#outs').classList.add('on'); };
 $('#bOutClose').onclick = () => $('#outs').classList.remove('on');
+$('#bMenu').onclick = () => { buildMenu(); $('#menu').classList.add('on'); };
+$('#bMenuClose').onclick = () => $('#menu').classList.remove('on');
+$('#bAcctClose').onclick = () => $('#acct').classList.remove('on');
+$('#bSrcClose').onclick = () => $('#srcs').classList.remove('on');
+$('#bAnalClose').onclick = () => $('#anal').classList.remove('on');
 $('#bArchClose').onclick = () => $('#arch').classList.remove('on');
 $('#aq').oninput = buildArch;
 $('#bFormClose').onclick = () => { $('#form').classList.remove('on'); $('#outs').classList.add('on'); };
