@@ -161,6 +161,21 @@ button{border:0;background:none;cursor:pointer}
 .opt.act .opt-t{color:var(--signal)}
 .none{padding:38px 22px;text-align:center;color:var(--muted)}
 
+.lock{position:fixed;inset:0;z-index:90;background:var(--slab);display:flex;
+  align-items:center;justify-content:center;padding:24px}
+.lock.off{display:none}
+.lock-box{width:100%;max-width:300px;text-align:center}
+.lock-t{color:#C7D5E0;font-size:15px;margin-bottom:16px}
+.lock-dots{display:flex;gap:13px;justify-content:center;margin-bottom:8px;height:15px}
+.lock-dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid #7E909D;display:block}
+.lock-dots i.on{background:#F2B441;border-color:#F2B441}
+.lock-err{color:#F2857A;font-size:12.5px;height:18px;margin-bottom:10px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.pad button{height:62px;border-radius:12px;background:#333F4B;color:#E4EBF0;font-size:22px;
+  border:1px solid #47545F;font-variant-numeric:tabular-nums}
+.pad button:active{background:#44525F}
+.pad button.wide{grid-column:span 1;font-size:15px}
+.stdot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block;margin-right:7px}
 .chips{display:flex;gap:7px;flex-wrap:wrap;padding:11px 14px;background:var(--surface);
   border-bottom:1px solid var(--hair)}
 .chip2{border:1px solid var(--hair);background:#fff;border-radius:8px;padding:8px 12px;
@@ -324,6 +339,25 @@ body.printing #docBody{width:718px;max-width:none}   /* 190 мм при 96 dpi *
     <button class="btn btn-ghost" id="bFormClose">Готово</button>
   </div></div>
   <div class="sheet-body"><div class="sheet-body-in" id="formBody"></div></div>
+</div>
+
+<!-- вход -->
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <div class="lock-t">Введите код</div>
+    <div class="lock-dots" id="lockDots"></div>
+    <div class="lock-err" id="lockErr"></div>
+    <div class="pad" id="pad"></div>
+  </div>
+</div>
+
+<!-- карточка заказа -->
+<div class="sheet" id="card">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Заказ</span>
+    <button class="btn btn-ghost" id="bCardClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="cardBody"></div></div>
 </div>
 
 <!-- меню -->
@@ -823,6 +857,73 @@ $('#bDone').onclick = () => $('#sheet').classList.remove('on');
 
 
 
+
+// ---------- статусы заказа ----------
+const STATUSES = [
+  {k:'new',    t:'Новый',     c:'#6B7A88'},
+  {k:'work',   t:'В работе',  c:'#0A6FB8'},
+  {k:'ready',  t:'Готов',     c:'#B26A00'},
+  {k:'closed', t:'Закрыт',    c:'#1B6E2B'},
+  {k:'cancel', t:'Отменён',   c:'#9A3412'},
+];
+const stOf = k => STATUSES.find(x => x.k === k) || STATUSES[0];
+
+// ---------- файлы заказа ----------
+// Тексты заказов остаются в обычном хранилище, а фото и документы —
+// в IndexedDB: в обычном не хватит места даже на пару снимков.
+let idb = null;
+function openFiles(){
+  return new Promise(res => {
+    try{
+      const rq = indexedDB.open('crm-files', 1);
+      rq.onupgradeneeded = () => {
+        const db = rq.result;
+        if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', {keyPath:'id'});
+      };
+      rq.onsuccess = () => { idb = rq.result; res(true); };
+      rq.onerror   = () => { idb = null; res(false); };
+    }catch(e){ idb = null; res(false); }
+  });
+}
+function fileTx(mode){
+  if (!idb) return null;
+  try{ return idb.transaction('files', mode).objectStore('files'); }catch(e){ return null; }
+}
+function putFile(rec){
+  return new Promise((res, rej) => {
+    const st = fileTx('readwrite');
+    if (!st) return rej(new Error('нет хранилища'));
+    const rq = st.put(rec);
+    rq.onsuccess = () => res(true);
+    rq.onerror   = () => rej(rq.error || new Error('не записалось'));
+  });
+}
+function getFile(id){
+  return new Promise((res, rej) => {
+    const st = fileTx('readonly');
+    if (!st) return rej(new Error('нет хранилища'));
+    const rq = st.get(id);
+    rq.onsuccess = () => res(rq.result || null);
+    rq.onerror   = () => rej(rq.error);
+  });
+}
+function delFile(id){
+  return new Promise(res => {
+    const st = fileTx('readwrite');
+    if (!st) return res(false);
+    const rq = st.delete(id);
+    rq.onsuccess = () => res(true);
+    rq.onerror   = () => res(false);
+  });
+}
+
+// ---------- журнал изменений ----------
+function logTo(rec, what){
+  rec.history = rec.history || [];
+  rec.history.unshift({at: new Date().toISOString(), t: what});
+  if (rec.history.length > 60) rec.history.length = 60;
+}
+
 // ---------- смета, зафиксированная до выезда ----------
 // Раздел 3 заказ-наряда печатает её, раздел 4 — фактический список.
 // Пока смета не зафиксирована, обе таблицы одинаковые.
@@ -940,10 +1041,23 @@ function snapshot(){
   };
 }
 
+// при пересохранении не терять статус, комментарии, файлы и журнал
+function mergeInto(rec){
+  const old = store && store.find(r => r.id === rec.id);
+  rec.status   = (old && old.status)   || 'new';
+  rec.comments = (old && old.comments) || [];
+  rec.files    = (old && old.files)    || [];
+  rec.history  = (old && old.history)  || [];
+  if (!old) logTo(rec, 'Заказ создан');
+  else if (old.total !== rec.total) logTo(rec, 'Сумма изменена: ' + fmt(old.total) + ' → ' + fmt(rec.total) + ' ₽');
+  else logTo(rec, 'Заказ сохранён');
+  return rec;
+}
+
 function saveOrder(silent){
   if (!store){ if(!silent) alert('Телефон не разрешил приложению хранить данные — архив недоступен.'); return; }
   if (!order.length){ if(!silent) alert('Заказ пуст — нечего сохранять.'); return; }
-  const rec = snapshot();
+  const rec = mergeInto(snapshot());
   curId = rec.id;
   const i = store.findIndex(r => r.id === rec.id);
   if (i >= 0) store[i] = rec; else store.unshift(rec);
@@ -974,6 +1088,7 @@ function delOrder(id){
   buildArch();
 }
 
+let archFilter = '';
 function buildArch(){
   const box = $('#archBody');
   box.innerHTML = '';
@@ -982,9 +1097,23 @@ function buildArch(){
     return;
   }
   const q = $('#aq').value.trim().toLowerCase();
-  const list = q
+  const fc = document.createElement('div'); fc.className='chips';
+  [['','Все']].concat(STATUSES.map(x => [x.k, x.t])).forEach(([k,t]) => {
+    const b = document.createElement('button');
+    b.className = 'chip2' + (archFilter === k ? ' on' : '');
+    const st = k ? stOf(k) : null;
+    if (archFilter === k && st){ b.style.background = st.c; b.style.borderColor = st.c; }
+    else if (st){ b.style.color = st.c; }
+    b.textContent = t;
+    b.onclick = () => { archFilter = k; buildArch(); };
+    fc.appendChild(b);
+  });
+  box.appendChild(fc);
+
+  let list = q
     ? store.filter(r => (r.client+' '+r.device+' '+r.docNo).toLowerCase().includes(q))
     : store;
+  if (archFilter) list = list.filter(r => (r.status||'new') === archFilter);
   if (!list.length){
     box.innerHTML = '<div class="none">' +
       (q ? 'Ничего не нашлось.' : 'Архив пуст. Сохраните первый заказ через «Оформить».') + '</div>';
@@ -1000,13 +1129,17 @@ function buildArch(){
       '</div>'+
       '<div class="opt-p">'+fmt(r.total)+' ₽</div>'+
       '<button class="line-del" aria-label="Удалить">×</button>';
-    el.querySelector('.opt-t').textContent = r.client || 'Без имени';
+    const st = stOf(r.status || 'new');
+    const dot = document.createElement('i');
+    dot.className = 'stdot'; dot.style.background = st.c;
+    const tt = el.querySelector('.opt-t');
+    tt.textContent = r.client || 'Без имени';
+    tt.prepend(dot);
     el.querySelector('.opt-s').textContent =
-      r.date + ' · ' + (r.device || 'техника не указана') + ' · ' + r.lines.length + ' поз.';
-    el.querySelector('.opt-main').onclick = () => {
-      if (order.length && !confirm('Открыть заказ? Текущий расчёт будет заменён.')) return;
-      openOrder(r);
-    };
+      st.t + ' · ' + r.date + ' · ' + (r.device || 'техника не указана') +
+      ((r.files && r.files.length) ? ' · ' + r.files.length + ' файл.' : '') +
+      ((r.comments && r.comments.length) ? ' · ' + r.comments.length + ' комм.' : '');
+    el.querySelector('.opt-main').onclick = () => openCard(r.id);
     el.querySelector('.line-del').onclick = e => {
       e.stopPropagation();
       if (confirm('Удалить заказ из архива?')) delOrder(r.id);
@@ -1412,6 +1545,153 @@ function exportXlsx(a){
   a2.href = url; a2.download = name;
   document.body.appendChild(a2); a2.click();
   setTimeout(() => { URL.revokeObjectURL(url); a2.remove(); }, 1500);
+}
+
+
+// ---------- карточка заказа ----------
+let cardId = null;
+
+function openCard(id){
+  cardId = id;
+  buildCard();
+  $('#card').classList.add('on');
+}
+function curRec(){ return store && store.find(r => r.id === cardId); }
+function persist(msg){
+  const r = curRec();
+  if (r && msg) logTo(r, msg);
+  saveStore();
+  buildCard();
+  if ($('#arch').classList.contains('on')) buildArch();
+}
+
+function buildCard(){
+  const box = $('#cardBody');
+  const r = curRec();
+  box.innerHTML = '';
+  if (!r){ box.innerHTML = '<div class="none">Заказ не найден.</div>'; return; }
+
+  const head = document.createElement('div');
+  head.className = 'fld';
+  head.innerHTML = '<div style="font-size:17px;font-weight:600"></div>'+
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:3px"></div>';
+  head.children[0].textContent = r.client || 'Без имени';
+  head.children[1].textContent = r.date + '  ·  ' + (r.device || 'техника не указана') +
+      '  ·  ' + fmt(r.total) + ' ₽  ·  ' + ((r.src && r.src.n) || 'источник не указан');
+  box.appendChild(head);
+
+  sec(box, 'Статус');
+  const ch = document.createElement('div'); ch.className='chips';
+  STATUSES.forEach(st => {
+    const b = document.createElement('button');
+    const on = (r.status || 'new') === st.k;
+    b.className = 'chip2' + (on ? ' on' : '');
+    if (on){ b.style.background = st.c; b.style.borderColor = st.c; }
+    else   { b.style.color = st.c; }
+    b.textContent = st.t;
+    b.onclick = () => {
+      if ((r.status||'new') === st.k) return;
+      r.status = st.k;
+      persist('Статус: ' + st.t);
+    };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+
+  sec(box, 'Комментарии');
+  const add = document.createElement('div'); add.className='fld';
+  add.innerHTML = '<textarea id="cmt" placeholder="Что важно помнить по этому заказу"></textarea>'+
+    '<button class="btn btn-ghost" id="bCmt" style="margin-top:7px">Добавить</button>';
+  box.appendChild(add);
+  add.querySelector('#bCmt').onclick = () => {
+    const v = add.querySelector('#cmt').value.trim();
+    if (!v) return;
+    r.comments = r.comments || [];
+    r.comments.unshift({at: new Date().toISOString(), t: v});
+    persist('Комментарий добавлен');
+  };
+  (r.comments || []).forEach((c, i) => {
+    const d = document.createElement('div'); d.className='trow';
+    d.innerHTML = '<span></span><button class="line-del" aria-label="Удалить">×</button>';
+    const sp = d.querySelector('span');
+    sp.textContent = c.t;
+    const em = document.createElement('em');
+    em.style.display = 'block';
+    em.textContent = new Date(c.at).toLocaleString('ru-RU');
+    sp.appendChild(em);
+    d.querySelector('.line-del').onclick = () => {
+      if (!confirm('Удалить комментарий?')) return;
+      r.comments.splice(i,1); persist('Комментарий удалён');
+    };
+    box.appendChild(d);
+  });
+
+  sec(box, 'Фото и документы');
+  const up = document.createElement('div'); up.className='fld';
+  up.innerHTML = '<input type="file" id="fup" multiple accept="image/*,.pdf,.doc,.docx,.heic">'+
+    '<div style="font-size:11.5px;color:var(--muted);margin-top:5px">Хранятся в этом телефоне, в облако не уходят</div>';
+  box.appendChild(up);
+  up.querySelector('#fup').onchange = async e => {
+    const list = Array.from(e.target.files || []);
+    if (!list.length) return;
+    if (!idb){ alert('Телефон не дал доступ к хранилищу файлов — прикрепить не получится.'); return; }
+    for (const f of list){
+      const id = 'f' + Date.now() + Math.random().toString(36).slice(2,7);
+      try{
+        await putFile({id, blob: f, name: f.name, type: f.type});
+        r.files = r.files || [];
+        r.files.unshift({id, name: f.name, type: f.type, size: f.size, at: new Date().toISOString()});
+      }catch(err){
+        alert('Не удалось сохранить «' + f.name + '». Возможно, в телефоне кончилось место.');
+      }
+    }
+    persist('Прикреплено файлов: ' + list.length);
+  };
+  (r.files || []).forEach((f, i) => {
+    const d = document.createElement('div'); d.className='trow';
+    d.innerHTML = '<span></span><button class="btn btn-ghost" style="min-height:34px;padding:0 10px">Открыть</button>'+
+                  '<button class="line-del" aria-label="Удалить">×</button>';
+    d.querySelector('span').textContent = f.name + '  ·  ' + Math.round((f.size||0)/1024) + ' КБ';
+    d.querySelector('.btn').onclick = async () => {
+      try{
+        const rec = await getFile(f.id);
+        if (!rec){ alert('Файл не найден в хранилище.'); return; }
+        const url = URL.createObjectURL(rec.blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+      }catch(err){ alert('Не удалось открыть файл.'); }
+    };
+    d.querySelector('.line-del').onclick = async () => {
+      if (!confirm('Удалить «' + f.name + '»?')) return;
+      await delFile(f.id);
+      r.files.splice(i,1);
+      persist('Файл удалён');
+    };
+    box.appendChild(d);
+  });
+
+  sec(box, 'История изменений');
+  (r.history || []).forEach(h => {
+    const d = document.createElement('div'); d.className='trow';
+    d.innerHTML = '<span></span>';
+    const sp = d.querySelector('span');
+    sp.textContent = h.t;
+    const em = document.createElement('em');
+    em.style.display = 'block';
+    em.textContent = new Date(h.at).toLocaleString('ru-RU');
+    sp.appendChild(em);
+    box.appendChild(d);
+  });
+
+  const act = document.createElement('div');
+  act.style.padding = '16px 14px 30px';
+  act.innerHTML = '<button class="btn btn-main" id="bLoad" style="width:100%">Открыть в калькуляторе</button>';
+  box.appendChild(act);
+  act.querySelector('#bLoad').onclick = () => {
+    if (order.length && !confirm('Открыть заказ? Текущий расчёт будет заменён.')) return;
+    openOrder(r);
+    $('#card').classList.remove('on');
+  };
 }
 
 // ---------- аналитика ----------
@@ -1842,6 +2122,117 @@ ${sigPair('Исполнитель:','Заказчик (работы разреш
 }
 
 
+
+// ---------- вход по коду ----------
+// Код лежит в этом же файле, а файл открыт в публичном репозитории.
+// Поэтому он защищает не от интернета: заказы хранятся только в этом
+// телефоне, по ссылке чужой человек увидит пустое приложение.
+// Код закрывает доступ тому, у кого оказался разблокированный телефон.
+const PINKEY = 'pin.v1';
+const DEF_PIN = '2332';
+function curPin(){
+  try{ return localStorage.getItem(PINKEY) || DEF_PIN; }catch(e){ return DEF_PIN; }
+}
+function setPin(v){
+  try{ localStorage.setItem(PINKEY, v); return true; }catch(e){ return false; }
+}
+
+let pinBuf = '';
+function drawDots(){
+  const d = $('#lockDots');
+  d.innerHTML = '';
+  for (let i = 0; i < 4; i++){
+    const e = document.createElement('i');
+    if (i < pinBuf.length) e.className = 'on';
+    d.appendChild(e);
+  }
+}
+function buildPad(){
+  const pad = $('#pad');
+  pad.innerHTML = '';
+  ['1','2','3','4','5','6','7','8','9','C','0','←'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = k;
+    if (k === 'C' || k === '←') b.className = 'wide';
+    b.onclick = () => {
+      if (k === 'C'){ pinBuf = ''; }
+      else if (k === '←'){ pinBuf = pinBuf.slice(0,-1); }
+      else if (pinBuf.length < 4){ pinBuf += k; }
+      drawDots();
+      $('#lockErr').textContent = '';
+      if (pinBuf.length === 4) setTimeout(tryPin, 120);
+    };
+    pad.appendChild(b);
+  });
+  drawDots();
+}
+function tryPin(){
+  if (pinBuf === curPin()){
+    pinBuf = '';
+    $('#lock').classList.add('off');
+    drawDots();
+  } else {
+    pinBuf = '';
+    drawDots();
+    $('#lockErr').textContent = 'Неверный код';
+  }
+}
+function lockNow(){
+  pinBuf = ''; drawDots();
+  $('#lockErr').textContent = '';
+  $('#lock').classList.remove('off');
+}
+function changePin(){
+  const a = prompt('Новый код из 4 цифр:');
+  if (a === null) return;
+  const v = String(a).replace(/[^0-9]/g,'');
+  if (v.length !== 4){ alert('Нужно ровно 4 цифры.'); return; }
+  const b = prompt('Повторите код:');
+  if (String(b).replace(/[^0-9]/g,'') !== v){ alert('Коды не совпали.'); return; }
+  alert(setPin(v) ? 'Код изменён.' : 'Не удалось сохранить код.');
+}
+
+// ---------- резервная копия ----------
+function exportBackup(){
+  if (!store){ alert('Архив недоступен.'); return; }
+  const data = JSON.stringify({v:1, at:new Date().toISOString(), orders:store, sources}, null, 1);
+  const blob = new Blob([data], {type:'application/json'});
+  const name = 'Резервная_копия_' + new Date().toISOString().slice(0,10) + '.json';
+  const f = (typeof File !== 'undefined') ? new File([blob], name, {type:blob.type}) : null;
+  if (f && navigator.canShare && navigator.canShare({files:[f]})){
+    navigator.share({files:[f], title:name}).catch(()=>{});
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+function importBackup(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try{
+        const d = JSON.parse(rd.result);
+        if (!d.orders) throw new Error('не тот файл');
+        if (!confirm('В копии заказов: ' + d.orders.length + '. Заменить текущий архив?')) return;
+        store = d.orders;
+        if (d.sources) { sources = d.sources; saveSources(); }
+        saveStore();
+        alert('Копия загружена. Фото и документы в копию не входят.');
+        render();
+      }catch(e){ alert('Файл не похож на резервную копию.'); }
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+
 // ---------- меню ----------
 const MENU = [
   ['Новый заказ', 'Очистить расчёт и начать заново', () => {
@@ -1865,6 +2256,15 @@ const MENU = [
   }],
   ['Источники и ставки', 'Агрегаторы и проценты комиссии', () => {
       $('#menu').classList.remove('on'); buildSrc(); $('#srcs').classList.add('on');
+  }],
+  ['Резервная копия', 'Сохранить архив в файл или восстановить из него', () => {
+      $('#menu').classList.remove('on');
+      confirm('ОК — сохранить копию в файл.\nОтмена — загрузить копию из файла.')
+        ? exportBackup() : importBackup();
+  }],
+  ['Сменить код', 'Код для входа в приложение', () => { $('#menu').classList.remove('on'); changePin(); }],
+  ['Заблокировать', 'Закрыть приложение кодом прямо сейчас', () => {
+      $('#menu').classList.remove('on'); lockNow();
   }],
 ];
 function buildMenu(){
@@ -1922,6 +2322,7 @@ $('#bMenuClose').onclick = () => $('#menu').classList.remove('on');
 $('#bAcctClose').onclick = () => $('#acct').classList.remove('on');
 $('#bSrcClose').onclick = () => $('#srcs').classList.remove('on');
 $('#bAnalClose').onclick = () => $('#anal').classList.remove('on');
+$('#bCardClose').onclick = () => $('#card').classList.remove('on');
 $('#bArchClose').onclick = () => $('#arch').classList.remove('on');
 $('#aq').oninput = buildArch;
 $('#bFormClose').onclick = () => { $('#form').classList.remove('on'); $('#outs').classList.add('on'); };
@@ -1974,6 +2375,8 @@ async function shareText(){
 }
 
 initKnob();
+buildPad();
+openFiles();          // хранилище файлов — если не дадут, приложение живёт без фото
 render();
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
