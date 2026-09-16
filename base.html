@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="База">
+<meta name="theme-color" content="#26303A">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-512.png">
+<title>База заказов</title>
+<style>
+:root{
+  --slab:#26303A; --slab-2:#1B242C;
+  --lcd:#C9D4C5; --lcd-ink:#161E15; --lcd-dim:#5A6858;
+  --bg:#E9ECEE; --surface:#FFFFFF;
+  --ink:#13202A; --muted:#5E6B75; --hair:#D3D9DD;
+  --signal:#0A6FB8; --danger:#B3261E;
+  --tap:44px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);
+  font:400 16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-text-size-adjust:100%;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.wrap{max-width:560px;margin:0 auto}
+button,select,input,textarea{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- корпус прибора ---------- */
+.rig{position:sticky;top:0;z-index:20;padding:calc(8px + env(safe-area-inset-top)) 10px 10px;
+  background:
+    linear-gradient(180deg,#323E49 0%,#26303A 42%,#1E2831 100%);
+  box-shadow:0 3px 14px rgba(0,0,0,.35)}
+.plate{position:relative;border-radius:12px;padding:12px 13px 13px;
+  background:
+    repeating-linear-gradient(97deg,rgba(255,255,255,.028) 0 1px,transparent 1px 3px),
+    linear-gradient(165deg,#3A4653 0%,#2B3641 55%,#222C35 100%);
+  border:1px solid #47545F;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 2px 8px rgba(0,0,0,.30)}
+/* винты по углам */
+.plate::before,.plate::after{content:'';position:absolute;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#8A98A4,#4B5762 60%,#39434D);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);top:7px}
+.plate::before{left:7px} .plate::after{right:7px}
+
+.rig-top{display:flex;align-items:baseline;justify-content:space-between;margin:0 14px 9px}
+.rig-brand{font-size:10.5px;letter-spacing:.16em;color:#93A3B0;text-transform:uppercase}
+.rig-date{font-size:11px;color:#7E909D;font-variant-numeric:tabular-nums}
+
+/* ---------- жидкокристаллическое табло ---------- */
+.lcd{border-radius:6px;padding:3px;
+  background:linear-gradient(180deg,#171E24,#232D35);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.55)}
+.lcd-face{position:relative;border-radius:4px;padding:8px 11px 9px;overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 50% 0%,#D3DCCD 0%,#C4CFC0 55%,#B6C2B2 100%)}
+.lcd-face::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.045) 0 1px,transparent 1px 3px)}
+.lcd-label{font:11px/1 ui-monospace,Menlo,monospace;color:#5F6D5D;letter-spacing:.08em}
+.lcd-digits{margin:5px 0 2px;min-height:52px;display:flex;align-items:flex-end}
+.lcd-digits svg{width:100%;height:auto;max-height:64px;display:block}
+.lcd-sub{display:flex;gap:10px;border-top:1px solid rgba(22,30,21,.22);padding-top:6px}
+.sub{flex:1;min-width:0}
+.sub i{display:block;font:normal 9.5px/1.2 ui-monospace,Menlo,monospace;color:#66755F}
+.sub b{display:block;font:600 13px/1.25 ui-monospace,Menlo,monospace;color:#1B2419;
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub b.cut{color:#7A4A12}
+
+/* ---------- поворотный регулятор ---------- */
+.accbar{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;align-items:center}
+.accbar .chip{border:1px solid #47545F;background:#222C35;color:#C7D5E0;border-radius:7px;
+  padding:6px 9px;font-size:12px;min-height:34px;display:inline-flex;align-items:center;gap:6px}
+.accbar .chip b{color:#F2B441;font-variant-numeric:tabular-nums}
+.accbar .chip.net b{color:#8FD694}
+.knobrow{display:flex;align-items:center;gap:13px;margin-top:11px}
+.knob{width:108px;height:108px;flex:none;touch-action:none;cursor:grab}
+.knob:active{cursor:grabbing}
+.knob svg{width:100%;height:100%;display:block}
+.knob:focus-visible{outline:2px solid #7FB7E0;outline-offset:3px;border-radius:50%}
+.knobinfo{min-width:0}
+.knobcap{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#93A3B0}
+.knobval{font:600 26px/1.15 ui-monospace,Menlo,monospace;color:#F2B441;
+  font-variant-numeric:tabular-nums;margin:1px 0 3px}
+.knobhint{font-size:11px;color:#7E909D;line-height:1.3}
+
+.empty{padding:52px 26px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-weight:600;margin-bottom:5px;font-size:17px}
+.line{background:var(--surface);border-bottom:1px solid var(--hair);padding:11px 14px;display:flex;gap:11px}
+.line-idx{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);
+  padding-top:3px;min-width:17px;font-variant-numeric:tabular-nums}
+.line-main{flex:1;min-width:0}
+.line-name{font-size:15px;line-height:1.3;margin-bottom:2px}
+.line-cat{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+.line-ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stepper{display:flex;align-items:center;border:1px solid var(--hair);border-radius:7px;overflow:hidden}
+.stepper button{width:38px;height:38px;font-size:19px;color:var(--signal);line-height:1}
+.stepper button:active{background:#EAF3FA}
+.stepper span{min-width:30px;text-align:center;font-variant-numeric:tabular-nums;font-size:15px;
+  border-left:1px solid var(--hair);border-right:1px solid var(--hair);height:38px;line-height:38px}
+.price-edit{border:1px solid var(--hair);border-radius:7px;padding:0 9px;height:38px;width:92px;
+  text-align:right;font-variant-numeric:tabular-nums;background:#FBFCFC;-webkit-appearance:none}
+.price-edit:focus{border-color:var(--signal);background:#fff;outline:none}
+.mult{color:var(--muted);font-size:14px}
+.line-sum{font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:600;
+  font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap}
+.line-hint{font-size:11.5px;color:var(--muted);margin-top:6px}
+.wlab{font-size:11.5px;color:var(--muted)}
+.wsel{border:1px solid var(--hair);border-radius:7px;height:34px;padding:0 6px;background:#FBFCFC}
+.cost-edit{border:1px solid var(--hair);border-radius:7px;height:34px;width:78px;padding:0 8px;
+  text-align:right;background:#FFF6E5;font-variant-numeric:tabular-nums;-webkit-appearance:none}
+.cost-edit:focus{border-color:var(--signal);background:#fff;outline:none}
+.wnow{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mini{border:1px solid var(--hair);border-radius:7px;height:34px;padding:0 9px;
+  font-size:12.5px;color:var(--signal);background:#fff;font-variant-numeric:tabular-nums}
+.mini:active{background:#EAF3FA}
+.seg{flex:1;height:38px;border:1px solid var(--hair);border-radius:8px;background:#fff;font-size:14.5px}
+.seg.on{background:var(--signal);color:#fff;border-color:var(--signal)}
+.line-del{align-self:flex-start;width:32px;height:32px;color:var(--muted);font-size:20px;line-height:1}
+.line-del:active{color:var(--danger)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:rgba(255,255,255,.96);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border-top:1px solid var(--hair);padding:9px 14px calc(9px + env(safe-area-inset-bottom))}
+.bar-in{max-width:560px;margin:0 auto;display:flex;gap:9px}
+.btn{min-height:var(--tap);border-radius:9px;padding:0 15px;font-size:15.5px;font-weight:500;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn-main{background:var(--signal);color:#fff;flex:1}
+.btn-main:active{background:#095C99}
+.btn-ghost{border:1px solid var(--hair);color:var(--ink);background:#fff}
+.btn-ghost:active{background:#F1F4F6}
+
+.sheet{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;flex-direction:column}
+.sheet.on{display:flex}
+.sheet-top{background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:calc(9px + env(safe-area-inset-top)) 12px 9px}
+.sheet-row{max-width:560px;margin:0 auto;display:flex;gap:9px;align-items:center}
+.sheet-h{flex:1;font-size:16px;font-weight:600}
+.search{flex:1;height:var(--tap);border:1px solid var(--hair);border-radius:9px;padding:0 12px;
+  background:#F4F6F7;-webkit-appearance:none}
+.search:focus{background:#fff;border-color:var(--signal);outline:none}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-body-in{max-width:560px;margin:0 auto;padding-bottom:30px}
+.crumb{display:flex;align-items:center;gap:8px;padding:9px 14px;color:var(--muted);font-size:13px;
+  background:#DFE4E7;position:sticky;top:0}
+.crumb button{color:var(--signal);font-size:14px;min-height:32px}
+.opt{width:100%;text-align:left;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:12px 14px;display:flex;gap:11px;align-items:center;min-height:var(--tap)}
+.opt:active{background:#EAF3FA}
+.opt-main{flex:1;min-width:0}
+.opt-t{font-size:15px;line-height:1.3}
+.opt-s{font-size:11.5px;color:var(--muted);margin-top:2px}
+.opt-p{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--muted);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.opt-cnt{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--muted)}
+.opt.hit{background:#DCEFD8}
+.opt.act .opt-t{color:var(--signal)}
+.none{padding:38px 22px;text-align:center;color:var(--muted)}
+
+.screen{display:block}
+.screen.off{display:none}
+.bar.off{display:none}
+.fhead{background:linear-gradient(180deg,#323E49,#242E38);color:#DCE3E8;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 12px;position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.fhead-top{display:flex;align-items:baseline;justify-content:space-between;
+  max-width:560px;margin:0 auto 9px}
+.fkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;width:100%;max-width:560px;
+  margin:0 auto;background:rgba(255,255,255,.08);border-radius:7px;overflow:hidden;text-align:left}
+.fkpi div{background:#1F2831;padding:9px 10px;min-width:0}
+.fkpi i{display:block;font:normal 10px/1.2 inherit;color:#8798A4;white-space:nowrap}
+.fkpi b{display:block;font:600 16px/1.25 ui-monospace,Menlo,monospace;color:#E4EBF0;
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fkpi b.good{color:#8FD694}
+.ford{width:100%;text-align:left;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:12px 14px;display:flex;gap:11px;align-items:flex-start;min-height:var(--tap)}
+.ford:active{background:#EAF3FA}
+.ford-main{flex:1;min-width:0}
+.ford-t{font-size:15.5px;display:flex;align-items:center;gap:7px}
+.ford-s{font-size:11.5px;color:var(--muted);margin-top:3px}
+.ford-r{text-align:right;white-space:nowrap}
+.ford-sum{font:600 15px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.ford-st{font-size:10.5px;margin-top:3px}
+.lock{position:fixed;inset:0;z-index:90;background:var(--slab);display:flex;
+  align-items:center;justify-content:center;padding:24px}
+.lock.off{display:none}
+.lock-box{width:100%;max-width:300px;text-align:center}
+.lock-t{color:#C7D5E0;font-size:15px;margin-bottom:16px}
+.lock-dots{display:flex;gap:13px;justify-content:center;margin-bottom:8px;height:15px}
+.lock-dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid #7E909D;display:block}
+.lock-dots i.on{background:#F2B441;border-color:#F2B441}
+.lock-err{color:#F2857A;font-size:12.5px;height:18px;margin-bottom:10px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.pad button{height:62px;border-radius:12px;background:#333F4B;color:#E4EBF0;font-size:22px;
+  border:1px solid #47545F;font-variant-numeric:tabular-nums}
+.pad button:active{background:#44525F}
+.pad button.wide{grid-column:span 1;font-size:15px}
+.stdot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block;margin-right:7px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding:11px 14px;background:var(--surface);
+  border-bottom:1px solid var(--hair)}
+.chip2{border:1px solid var(--hair);background:#fff;border-radius:8px;padding:8px 12px;
+  font-size:14px;min-height:38px}
+.chip2.on{background:var(--signal);color:#fff;border-color:var(--signal)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);
+  border-bottom:1px solid var(--hair)}
+.kpi{background:var(--surface);padding:11px 13px}
+.kpi i{display:block;font:normal 11px/1.2 inherit;color:var(--muted);margin-bottom:3px}
+.kpi b{display:block;font:600 19px/1.2 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.kpi b.good{color:#1B6E2B} .kpi b.bad{color:#9A3412}
+.tsec{padding:13px 14px 5px;font-size:12px;color:var(--muted);background:var(--bg)}
+.trow{display:flex;gap:10px;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:10px 14px;align-items:baseline}
+.trow span{flex:1;min-width:0;font-size:14px}
+.trow em{font-style:normal;font-size:12px;color:var(--muted)}
+.trow b{font:600 14px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dates{display:flex;gap:9px;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--hair)}
+.dates input{flex:1;border:1px solid var(--hair);border-radius:8px;padding:9px 10px;background:#FBFCFC}
+.fld{background:var(--surface);border-bottom:1px solid var(--hair);padding:9px 14px}
+.fld label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px}
+.fld input,.fld textarea{width:100%;border:1px solid var(--hair);border-radius:8px;
+  padding:9px 10px;background:#FBFCFC;-webkit-appearance:none}
+.fld input:focus,.fld textarea:focus{border-color:var(--signal);background:#fff;outline:none}
+.fld textarea{min-height:64px;resize:vertical}
+.grp{padding:14px 14px 5px;font-size:12px;color:var(--muted);background:var(--bg)}
+
+.empty{padding:52px 26px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font-weight:600;margin-bottom:5px;font-size:17px}
+.line{background:var(--surface);border-bottom:1px solid var(--hair);padding:11px 14px;display:flex;gap:11px}
+.line-idx{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);
+  padding-top:3px;min-width:17px;font-variant-numeric:tabular-nums}
+.line-main{flex:1;min-width:0}
+.line-name{font-size:15px;line-height:1.3;margin-bottom:2px}
+.line-cat{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+.line-ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stepper{display:flex;align-items:center;border:1px solid var(--hair);border-radius:7px;overflow:hidden}
+.stepper button{width:38px;height:38px;font-size:19px;color:var(--signal);line-height:1}
+.stepper button:active{background:#EAF3FA}
+.stepper span{min-width:30px;text-align:center;font-variant-numeric:tabular-nums;font-size:15px;
+  border-left:1px solid var(--hair);border-right:1px solid var(--hair);height:38px;line-height:38px}
+.price-edit{border:1px solid var(--hair);border-radius:7px;padding:0 9px;height:38px;width:92px;
+  text-align:right;font-variant-numeric:tabular-nums;background:#FBFCFC;-webkit-appearance:none}
+.price-edit:focus{border-color:var(--signal);background:#fff;outline:none}
+.mult{color:var(--muted);font-size:14px}
+.line-sum{font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:600;
+  font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap}
+.line-hint{font-size:11.5px;color:var(--muted);margin-top:6px}
+.wlab{font-size:11.5px;color:var(--muted)}
+.wsel{border:1px solid var(--hair);border-radius:7px;height:34px;padding:0 6px;background:#FBFCFC}
+.cost-edit{border:1px solid var(--hair);border-radius:7px;height:34px;width:78px;padding:0 8px;
+  text-align:right;background:#FFF6E5;font-variant-numeric:tabular-nums;-webkit-appearance:none}
+.cost-edit:focus{border-color:var(--signal);background:#fff;outline:none}
+.wnow{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.mini{border:1px solid var(--hair);border-radius:7px;height:34px;padding:0 9px;
+  font-size:12.5px;color:var(--signal);background:#fff;font-variant-numeric:tabular-nums}
+.mini:active{background:#EAF3FA}
+.seg{flex:1;height:38px;border:1px solid var(--hair);border-radius:8px;background:#fff;font-size:14.5px}
+.seg.on{background:var(--signal);color:#fff;border-color:var(--signal)}
+.line-del{align-self:flex-start;width:32px;height:32px;color:var(--muted);font-size:20px;line-height:1}
+.line-del:active{color:var(--danger)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:rgba(255,255,255,.96);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border-top:1px solid var(--hair);padding:9px 14px calc(9px + env(safe-area-inset-bottom))}
+.bar-in{max-width:560px;margin:0 auto;display:flex;gap:9px}
+.btn{min-height:var(--tap);border-radius:9px;padding:0 15px;font-size:15.5px;font-weight:500;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn-main{background:var(--signal);color:#fff;flex:1}
+.btn-main:active{background:#095C99}
+.btn-ghost{border:1px solid var(--hair);color:var(--ink);background:#fff}
+.btn-ghost:active{background:#F1F4F6}
+
+.sheet{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;flex-direction:column}
+.sheet.on{display:flex}
+.sheet-top{background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:calc(9px + env(safe-area-inset-top)) 12px 9px}
+.sheet-row{max-width:560px;margin:0 auto;display:flex;gap:9px;align-items:center}
+.sheet-h{flex:1;font-size:16px;font-weight:600}
+.search{flex:1;height:var(--tap);border:1px solid var(--hair);border-radius:9px;padding:0 12px;
+  background:#F4F6F7;-webkit-appearance:none}
+.search:focus{background:#fff;border-color:var(--signal);outline:none}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-body-in{max-width:560px;margin:0 auto;padding-bottom:30px}
+.crumb{display:flex;align-items:center;gap:8px;padding:9px 14px;color:var(--muted);font-size:13px;
+  background:#DFE4E7;position:sticky;top:0}
+.crumb button{color:var(--signal);font-size:14px;min-height:32px}
+.opt{width:100%;text-align:left;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:12px 14px;display:flex;gap:11px;align-items:center;min-height:var(--tap)}
+.opt:active{background:#EAF3FA}
+.opt-main{flex:1;min-width:0}
+.opt-t{font-size:15px;line-height:1.3}
+.opt-s{font-size:11.5px;color:var(--muted);margin-top:2px}
+.opt-p{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--muted);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.opt-cnt{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--muted)}
+.opt.hit{background:#DCEFD8}
+.opt.act .opt-t{color:var(--signal)}
+.none{padding:38px 22px;text-align:center;color:var(--muted)}
+
+.screen{display:block}
+.screen.off{display:none}
+.bar.off{display:none}
+.fhead{background:linear-gradient(180deg,#323E49,#242E38);color:#DCE3E8;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 12px;position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.fhead-top{display:flex;align-items:baseline;justify-content:space-between;
+  max-width:560px;margin:0 auto 9px}
+.fkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;width:100%;max-width:560px;
+  margin:0 auto;background:rgba(255,255,255,.08);border-radius:7px;overflow:hidden;text-align:left}
+.fkpi div{background:#1F2831;padding:9px 10px;min-width:0}
+.fkpi i{display:block;font:normal 10px/1.2 inherit;color:#8798A4;white-space:nowrap}
+.fkpi b{display:block;font:600 16px/1.25 ui-monospace,Menlo,monospace;color:#E4EBF0;
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fkpi b.good{color:#8FD694}
+.ford{width:100%;text-align:left;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:12px 14px;display:flex;gap:11px;align-items:flex-start;min-height:var(--tap)}
+.ford:active{background:#EAF3FA}
+.ford-main{flex:1;min-width:0}
+.ford-t{font-size:15.5px;display:flex;align-items:center;gap:7px}
+.ford-s{font-size:11.5px;color:var(--muted);margin-top:3px}
+.ford-r{text-align:right;white-space:nowrap}
+.ford-sum{font:600 15px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.ford-st{font-size:10.5px;margin-top:3px}
+.lock{position:fixed;inset:0;z-index:90;background:var(--slab);display:flex;
+  align-items:center;justify-content:center;padding:24px}
+.lock.off{display:none}
+.lock-box{width:100%;max-width:300px;text-align:center}
+.lock-t{color:#C7D5E0;font-size:15px;margin-bottom:16px}
+.lock-dots{display:flex;gap:13px;justify-content:center;margin-bottom:8px;height:15px}
+.lock-dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid #7E909D;display:block}
+.lock-dots i.on{background:#F2B441;border-color:#F2B441}
+.lock-err{color:#F2857A;font-size:12.5px;height:18px;margin-bottom:10px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.pad button{height:62px;border-radius:12px;background:#333F4B;color:#E4EBF0;font-size:22px;
+  border:1px solid #47545F;font-variant-numeric:tabular-nums}
+.pad button:active{background:#44525F}
+.pad button.wide{grid-column:span 1;font-size:15px}
+.stdot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block;margin-right:7px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding:11px 14px;background:var(--surface);
+  border-bottom:1px solid var(--hair)}
+.chip2{border:1px solid var(--hair);background:#fff;border-radius:8px;padding:8px 12px;
+  font-size:14px;min-height:38px}
+.chip2.on{background:var(--signal);color:#fff;border-color:var(--signal)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);
+  border-bottom:1px solid var(--hair)}
+.kpi{background:var(--surface);padding:11px 13px}
+.kpi i{display:block;font:normal 11px/1.2 inherit;color:var(--muted);margin-bottom:3px}
+.kpi b{display:block;font:600 19px/1.2 ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.kpi b.good{color:#1B6E2B} .kpi b.bad{color:#9A3412}
+.tsec{padding:13px 14px 5px;font-size:12px;color:var(--muted);background:var(--bg)}
+.trow{display:flex;gap:10px;background:var(--surface);border-bottom:1px solid var(--hair);
+  padding:10px 14px;align-items:baseline}
+.trow span{flex:1;min-width:0;font-size:14px}
+.trow em{font-style:normal;font-size:12px;color:var(--muted)}
+.trow b{font:600 14px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dates{display:flex;gap:9px;padding:11px 14px;background:var(--surface);border-bottom:1px solid var(--hair)}
+.dates input{flex:1;border:1px solid var(--hair);border-radius:8px;padding:9px 10px;background:#FBFCFC}
+.fld{background:var(--surface);border-bottom:1px solid var(--hair);padding:9px 14px}
+.fld label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px}
+.fld input,.fld textarea{width:100%;border:1px solid var(--hair);border-radius:8px;
+  padding:9px 10px;background:#FBFCFC;-webkit-appearance:none}
+.fld input:focus,.fld textarea:focus{border-color:var(--signal);background:#fff;outline:none}
+.fld textarea{min-height:64px;resize:vertical}
+.grp{padding:14px 14px 5px;font-size:12px;color:var(--muted);background:var(--bg)}
+
+/* ---------- печатный документ ---------- */
+.docview{position:fixed;inset:0;z-index:60;background:#fff;overflow-y:auto;display:none}
+.docview.on{display:block}
+.docbar{position:sticky;top:0;background:rgba(255,255,255,.97);border-bottom:1px solid var(--hair);
+  padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;gap:9px;
+  max-width:190mm;margin:0 auto}
+.docpage{max-width:190mm;margin:0 auto;padding:14px 14px 60px;
+  font:10pt/1.25 "Times New Roman",Times,serif;color:#000}
+.docpage h1{font-size:12pt;text-align:center;margin:0 0 6px}
+.docpage h2{font-size:10pt;margin:7px 0 3px}
+.docpage p{margin:0 0 3px;text-align:justify}
+.docpage .terms{column-count:2;column-gap:6mm;font-size:7.4pt;line-height:1.18;
+  text-align:justify;margin:3px 0 5px}
+.docpage .terms p{margin:0 0 2px}
+.docpage .terms h2{font-size:8pt;margin:0 0 2px;break-after:avoid}
+.docpage .terms ul{margin:1px 0 2px 13px}
+.docpage .fill{border-bottom:1px solid #000;display:inline-block;min-width:60px;padding:0 3px}
+.docpage table{width:100%;border-collapse:collapse;margin:4px 0;font-size:8.6pt}
+.docpage th,.docpage td{border:1px solid #000;padding:2px 4px;vertical-align:top}
+.docpage th{background:#EEE;font-weight:bold;text-align:center}
+.docpage td.n,.docpage td.c{text-align:center}
+.docpage td.r{text-align:right;white-space:nowrap}
+.docpage .sig{display:flex;gap:18px;margin-top:16px}
+.docpage .sig>div{flex:1}
+.docpage .sigbox{border-bottom:1px solid #000;height:60px;margin:4px 0 2px;position:relative}
+.docpage .sigpad{width:100%;height:60px;display:block;touch-action:none;cursor:crosshair}
+.docpage .sigimg{max-height:112px;max-width:100%;display:block;
+  margin:-14px 0 -22px 26px;position:relative;z-index:1}
+.docpage .sigcap{font-size:8.6pt}
+.docpage .sig{margin-top:8px;gap:14px}
+.docpage .conf{font-size:8.2pt;line-height:1.22;text-align:justify;margin:5px 0 2px;
+  padding:4px 6px;border:1px solid #000;background:#F4F4F4}
+.docpage .sigclr{font-size:9pt;color:#0A6FB8;padding:2px 0;text-decoration:underline}
+.docpage .sighint{font-size:9pt;color:#555;margin-top:2px}
+.docpage .tot{margin:8px 0}
+.docpage ul{margin:4px 0 6px 18px;padding:0}
+.docpage li{margin-bottom:2px}
+@media print{
+  body{padding:0;background:#fff}
+  .rig,.bar,.wrap,.sheet{display:none!important}
+  .docbar,.sigclr,.sighint{display:none!important}
+  .docview.on{position:static;display:block;overflow:visible}
+  .docpage{max-width:none;padding:10mm;font-size:9.4pt;line-height:1.2}
+  .docpage h1{font-size:11pt}
+  .docpage h2{font-size:9.4pt;margin:5px 0 2px}
+  .docpage .terms{font-size:6.6pt;line-height:1.14;column-gap:5mm}
+  .docpage .terms h2{font-size:7.2pt}
+  .docpage table{font-size:8.2pt;margin:3px 0}
+  .docpage th,.docpage td{padding:1.5px 3px}
+  .docpage .conf{font-size:7.2pt;line-height:1.16}
+  .docpage .sigbox{height:52px}
+  .docpage .sigimg{max-height:104px;margin:-12px 0 -20px 26px}
+  /* нулевые поля страницы: так Safari не печатает адрес сайта и дату.
+     Отступы вместо них заданы внутри .docpage */
+  @page{size:A4;margin:0}
+}
+body.printing #docBody{width:718px;max-width:none}   /* 190 мм при 96 dpi */
+
+.screen{display:block}
+.fhead{background:linear-gradient(180deg,#323E49,#242E38);color:#DCE3E8;
+  padding:calc(10px + env(safe-area-inset-top)) 14px 12px;position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.fhead-top{display:flex;align-items:baseline;justify-content:space-between;
+  max-width:560px;margin:0 auto 9px;gap:10px}
+.fkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;width:100%;max-width:560px;
+  margin:0 auto;background:rgba(255,255,255,.08);border-radius:7px;overflow:hidden;text-align:left}
+.fkpi div{background:#1F2831;padding:9px 10px;min-width:0}
+.fkpi i{display:block;font:normal 10px/1.2 inherit;color:#8798A4;white-space:nowrap}
+.fkpi b{display:block;font:600 16px/1.25 ui-monospace,Menlo,monospace;color:#E4EBF0;
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fkpi b.good{color:#8FD694}
+
+.brow{width:100%;text-align:left;border:0;border-left:5px solid transparent;
+  border-bottom:1px solid rgba(0,0,0,.07);padding:12px 14px;display:flex;gap:11px;
+  align-items:flex-start;min-height:var(--tap)}
+.brow:active{filter:brightness(.96)}
+.brow-main{flex:1;min-width:0}
+.brow-t{font-size:15.5px;font-weight:500}
+.brow-s{font-size:11.5px;color:#4A555E;margin-top:3px}
+.brow-r{text-align:right;white-space:nowrap}
+.brow-sum{font:600 15px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.brow-age{font-size:11px;color:#5E6B75;margin-top:3px}
+
+.brow.closed{opacity:.6}
+.brow.closed .brow-t,.brow.closed .brow-sum{text-decoration:line-through}
+
+/* Просрочка: заказ висит две недели и не закрыт */
+.brow.old{background:#FDE2DE;border-left-color:#B3261E;animation:pulseOld 1.6s ease-in-out infinite}
+.brow.old .brow-age{color:#9A1B14;font-weight:600}
+@keyframes pulseOld{
+  0%,100%{background:#FDE2DE}
+  50%{background:#F7C4BD}
+}
+@media (prefers-reduced-motion:reduce){
+  .brow.old{animation:none;background:#F7C4BD}
+}
+
+
+.wizdots{display:flex;gap:6px;max-width:560px;margin:9px auto 0}
+.wizdots i{flex:1;height:4px;border-radius:2px;background:var(--hair);display:block}
+.wizdots i.on{background:var(--signal)}
+.wizdots i.done{background:#8FB9D8}
+.wizbar{border-top:1px solid var(--hair);background:rgba(255,255,255,.97);
+  padding:9px 14px calc(9px + env(safe-area-inset-bottom));display:flex;gap:9px;
+  max-width:560px;margin:0 auto;width:100%}
+.wizbar .btn{flex:1}
+.wizhint{padding:11px 14px 3px;font-size:12.5px;color:var(--muted);background:var(--bg)}
+.pick{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 8px}
+.pick button{border:1px solid var(--hair);background:#fff;border-radius:7px;
+  padding:7px 10px;font-size:13px;min-height:34px;color:var(--signal)}
+.pick button:active{background:#EAF3FA}
+
+</style>
+</head>
+<body>
+
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <div class="lock-t">Введите код</div>
+    <div class="lock-dots" id="lockDots"></div>
+    <div class="lock-err" id="lockErr"></div>
+    <div class="pad" id="pad"></div>
+  </div>
+</div>
+
+<div class="screen" id="board">
+  <header class="fhead">
+    <div class="fhead-top">
+      <span class="rig-brand" id="bTitle">Заказы · текущий месяц</span>
+      <span class="rig-date" id="date2"></span>
+    </div>
+    <button class="fkpi" id="fkpi" aria-label="Открыть аналитику"></button>
+  </header>
+  <div class="sheet-top" style="padding:9px 12px">
+    <div class="sheet-row"><input class="search" id="fq" type="search" placeholder="Поиск: клиент, техника, номер" autocomplete="off"></div>
+  </div>
+  <div id="boardFilter"></div>
+  <div id="boardList"></div>
+</div>
+
+<div class="bar"><div class="bar-in">
+  <button class="btn btn-ghost" id="bMenuF" aria-label="Меню">☰</button>
+  <button class="btn btn-main" id="bCalc">Калькулятор</button>
+  <button class="btn btn-ghost" id="bMonths" aria-label="Прошлые месяцы">📅</button>
+</div></div>
+
+<div class="sheet" id="months">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Прошлые месяцы</span>
+    <button class="btn btn-ghost" id="bMonthsClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="monthsBody"></div></div>
+</div>
+
+
+<div class="sheet" id="wiz">
+  <div class="sheet-top">
+    <div class="sheet-row">
+      <span class="sheet-h" id="wizTitle">Новый заказ</span>
+      <button class="btn btn-ghost" id="bWizClose">Позже</button>
+    </div>
+    <div class="wizdots" id="wizDots"></div>
+  </div>
+  <div class="sheet-body"><div class="sheet-body-in" id="wizBody"></div></div>
+  <div class="wizbar">
+    <button class="btn btn-ghost" id="bWizPrev">Назад</button>
+    <button class="btn btn-main" id="bWizNext">Далее</button>
+  </div>
+</div>
+
+
+<div class="sheet" id="card">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Заказ</span>
+    <button class="btn btn-ghost" id="bCardClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="cardBody"></div></div>
+</div>
+
+<div class="sheet" id="menu">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Меню</span>
+    <button class="btn btn-ghost" id="bMenuClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="menuBody"></div></div>
+</div>
+
+<div class="sheet" id="acct">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Учёт заказа</span>
+    <button class="btn btn-ghost" id="bAcctClose">Готово</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="acctBody"></div></div>
+</div>
+
+<div class="sheet" id="srcs">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Источники и ставки</span>
+    <button class="btn btn-ghost" id="bSrcClose">Готово</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="srcBody"></div></div>
+</div>
+
+<div class="sheet" id="anal">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Аналитика</span>
+    <button class="btn btn-ghost" id="bAnalClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="analBody"></div></div>
+</div>
+
+<div class="sheet" id="form">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Данные клиента</span>
+    <button class="btn btn-ghost" id="bFormClose">Готово</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="formBody"></div></div>
+</div>
+
+<div class="sheet" id="outs">
+  <div class="sheet-top"><div class="sheet-row">
+    <span class="sheet-h">Оформить</span>
+    <button class="btn btn-ghost" id="bOutClose">Закрыть</button>
+  </div></div>
+  <div class="sheet-body"><div class="sheet-body-in" id="outList"></div></div>
+</div>
+
+<div class="docview" id="docview">
+  <div class="docbar">
+    <button class="btn btn-ghost" id="bDocClose">Закрыть</button>
+    <button class="btn btn-main" id="bPrint">Печать / PDF</button>
+  </div>
+  <div class="docpage" id="docBody"></div>
+</div>
+
+<script>
+const DB = {sign: 'data:image/png;base64,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'};
+
+const $ = s => document.querySelector(s);
+const fmt = n => Math.round(n).toLocaleString('ru-RU').replace(/\u00A0/g,' ');
+const esc = s => String(s==null?'':s).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+const today = () => new Date().toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+// ---------- статусы ----------
+const STATUSES = [
+  {k:'agree',  t:'На согласовании', c:'#B26A00', bg:'#FFF2DC'},
+  {k:'work',   t:'В работе',        c:'#0A6FB8', bg:'#E4F1FB'},
+  {k:'wait',   t:'Жду деталь',      c:'#6A3FB5', bg:'#EFE8FB'},
+  {k:'done',   t:'Сдан',            c:'#1B6E2B', bg:'#E3F4E6'},
+  {k:'reject', t:'Отказ',           c:'#9A3412', bg:'#FBE7E1'},
+  {k:'cancel', t:'Отмена',          c:'#6B7A88', bg:'#EDF0F2'},
+  {k:'closed', t:'Закрыт',          c:'#59636B', bg:'#F2F4F5'},
+];
+const stOf = k => STATUSES.find(x => x.k === k) || STATUSES[0];
+const DEAD = ['closed','cancel','reject'];          // не висят и не стареют
+const OLD_DAYS = 14;
+
+// состояние текущего заказа
+let order = [], discount = 0, curId = null;
+const C = {};
+const dsel = {value:0};                             // ручки скидки здесь нет
+function totals(){
+  const gross = order.reduce((a,l)=>a+l.price*l.qty,0);
+  const cut = Math.round(gross*discount/100);
+  return {gross, cut, net: gross-cut};
+}
+const nameOf = l => l.t;
+const catOf  = l => l.p ? ('Деталь · ' + (l.pcName || 'своя')) : (l.cat || 'Работа');
+function autoW(sum){ if (!sum) return 0; return sum<=5000 ? 30 : (sum<=10000 ? 60 : 90); }
+function warranty(l){
+  const sum = l.price*l.qty;
+  return (l.w===null || l.w===undefined || l.w==='') ? autoW(sum) : +l.w;
+}
+const W_OPTS = [['','авто'],['0','без гар.'],['14','14 дн'],['30','30 дн'],
+                ['60','60 дн'],['90','90 дн'],['180','180 дн'],['365','365 дн']];
+
+// ---------- файлы заказа ----------
+// Тексты заказов остаются в обычном хранилище, а фото и документы —
+// в IndexedDB: в обычном не хватит места даже на пару снимков.
+let idb = null;
+function openFiles(){
+  return new Promise(res => {
+    try{
+      const rq = indexedDB.open('crm-files', 1);
+      rq.onupgradeneeded = () => {
+        const db = rq.result;
+        if (!db.objectStoreNames.contains('files')) db.createObjectStore('files', {keyPath:'id'});
+      };
+      rq.onsuccess = () => { idb = rq.result; res(true); };
+      rq.onerror   = () => { idb = null; res(false); };
+    }catch(e){ idb = null; res(false); }
+  });
+}
+function fileTx(mode){
+  if (!idb) return null;
+  try{ return idb.transaction('files', mode).objectStore('files'); }catch(e){ return null; }
+}
+function putFile(rec){
+  return new Promise((res, rej) => {
+    const st = fileTx('readwrite');
+    if (!st) return rej(new Error('нет хранилища'));
+    const rq = st.put(rec);
+    rq.onsuccess = () => res(true);
+    rq.onerror   = () => rej(rq.error || new Error('не записалось'));
+  });
+}
+function getFile(id){
+  return new Promise((res, rej) => {
+    const st = fileTx('readonly');
+    if (!st) return rej(new Error('нет хранилища'));
+    const rq = st.get(id);
+    rq.onsuccess = () => res(rq.result || null);
+    rq.onerror   = () => rej(rq.error);
+  });
+}
+function delFile(id){
+  return new Promise(res => {
+    const st = fileTx('readwrite');
+    if (!st) return res(false);
+    const rq = st.delete(id);
+    rq.onsuccess = () => res(true);
+    rq.onerror   = () => res(false);
+  });
+}
+
+
+// ---------- журнал изменений ----------
+function logTo(rec, what){
+  rec.history = rec.history || [];
+  rec.history.unshift({at: new Date().toISOString(), t: what});
+  if (rec.history.length > 60) rec.history.length = 60;
+}
+
+
+// ---------- смета, зафиксированная до выезда ----------
+// Раздел 3 заказ-наряда печатает её, раздел 4 — фактический список.
+// Пока смета не зафиксирована, обе таблицы одинаковые.
+let estimate = null;     // {lines, discount, at}
+
+function fixEstimate(){
+  if (!order.length){ alert('Заказ пуст — нечего фиксировать.'); return; }
+  estimate = {lines: JSON.parse(JSON.stringify(order)), discount, at: today()};
+  alert('Смета зафиксирована: ' + order.length + ' поз. на ' + fmt(totals().net) + ' ₽.\n' +
+        'Теперь можно добавлять работы — в разделе 3 останется исходная смета.');
+  render();
+}
+function clearEstimate(){
+  estimate = null;
+  alert('Смета сброшена. Оба раздела снова показывают текущий список.');
+  render();
+}
+function estMoney(){
+  if (!estimate) return totals();
+  const g = estimate.lines.reduce((a,l)=>a+l.price*l.qty,0);
+  const c = Math.round(g*(estimate.discount||0)/100);
+  return {gross:g, cut:c, net:g-c};
+}
+
+
+// ---------- источники заказов и ставки ----------
+const SRCKEY = 'sources.v1';
+const DEF_SRC = [
+  {n:'Прямой заказ', r:0},
+  {n:'Сарафанное радио', r:0},
+];
+let sources = DEF_SRC.slice();
+function loadSources(){
+  try{
+    const raw = localStorage.getItem(SRCKEY);
+    if (raw) sources = JSON.parse(raw);
+  }catch(e){}
+}
+function saveSources(){
+  try{ localStorage.setItem(SRCKEY, JSON.stringify(sources)); return true; }catch(e){ return false; }
+}
+loadSources();
+
+const ORDER_TYPES = ['ПК','ТВ','ПРИНТЕР','ГАРАНТИЯ','РОУТЕРЫ'];
+
+// учётные поля текущего заказа
+let acc = { src: 0, types: [], extra: 0 };
+function resetAcc(){ acc = { src: 0, types: [], extra: 0 }; }
+
+
+// ---------- расчёт денег по заказу ----------
+// Комиссия агрегатора берётся только с работ; детали в базу не входят.
+// Скидка уменьшает работы пропорционально, поэтому процент считается
+// от той суммы за работы, которую реально заплатил клиент.
+function money(lines, disc, srcRate, extra){
+  let works = 0, partsSale = 0, partsCost = 0;
+  (lines||[]).forEach(l => {
+    const sum = l.price*l.qty;
+    if (l.p){ partsSale += sum; partsCost += (+l.cost||0)*l.qty; }
+    else     { works += sum; }
+  });
+  const gross = works + partsSale;
+  const k = 1 - (disc||0)/100;
+  const worksNet = works * k;
+  const net = gross * k;
+  const comm = Math.round(worksNet * (srcRate||0) / 100);
+  const ex = +extra || 0;
+  const revenue = net + ex;                      // оборот
+  const profit  = net + ex - comm - partsCost;   // чистыми
+  return {works, partsSale, partsCost, gross, worksNet:Math.round(worksNet),
+          net:Math.round(net), comm, extra:ex,
+          revenue:Math.round(revenue), profit:Math.round(profit)};
+}
+function curMoney(){
+  const sr = sources[acc.src] ? sources[acc.src].r : 0;
+  return money(order, discount, sr, acc.extra);
+}
+
+
+// ---------- учёт заказа ----------
+function buildAcct(){
+  const box = $('#acctBody');
+  box.innerHTML = '';
+
+  const g1 = document.createElement('div'); g1.className='grp'; g1.textContent='Источник заказа';
+  box.appendChild(g1);
+  const f1 = document.createElement('div'); f1.className='fld';
+  f1.innerHTML = '<label for="accSrc">Откуда пришёл заказ</label><select id="accSrc" style="width:100%;'+
+    'border:1px solid var(--hair);border-radius:8px;padding:10px;background:#FBFCFC"></select>';
+  box.appendChild(f1);
+  const sel = f1.querySelector('#accSrc');
+  sources.forEach((x,i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = x.n + (x.r ? '  —  ' + x.r + '%' : '  —  без комиссии');
+    if (i === acc.src) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = e => { acc.src = +e.target.value; render(); buildAcct(); };
+
+  const g2 = document.createElement('div'); g2.className='grp'; g2.textContent='Тип заказа';
+  box.appendChild(g2);
+  const ch = document.createElement('div'); ch.className='chips';
+  ORDER_TYPES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'chip2' + (acc.types.includes(t) ? ' on' : '');
+    b.textContent = t;
+    b.onclick = () => {
+      const i = acc.types.indexOf(t);
+      if (i >= 0) acc.types.splice(i,1); else acc.types.push(t);
+      buildAcct();
+    };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+
+  const g3 = document.createElement('div'); g3.className='grp'; g3.textContent='Дополнительно';
+  box.appendChild(g3);
+  const f2 = document.createElement('div'); f2.className='fld';
+  f2.innerHTML = '<label for="accExtra">Доход мимо агрегатора, ₽</label>'+
+    '<input id="accExtra" inputmode="numeric" value="'+(acc.extra||'')+'">';
+  box.appendChild(f2);
+  f2.querySelector('#accExtra').onblur = e => {
+    const v = parseInt(String(e.target.value).replace(/[^0-9]/g,''),10);
+    acc.extra = isNaN(v) ? 0 : v; render();
+  };
+
+  const m = curMoney();
+  const sum = document.createElement('div');
+  sum.className = 'kpis';
+  sum.innerHTML =
+    kpi('Работы', m.works) + kpi('Детали (продажа)', m.partsSale) +
+    kpi('Себестоимость деталей', m.partsCost, 'bad') +
+    kpi('Комиссия', m.comm, 'bad') +
+    kpi('Оборот', m.revenue) + kpi('Чистыми', m.profit, 'good');
+  box.appendChild(sum);
+}
+const kpi = (label, val, cls) =>
+  '<div class="kpi"><i>'+label+'</i><b'+(cls?' class="'+cls+'"':'')+'>'+fmt(val)+' ₽</b></div>';
+
+
+// ---------- источники и ставки ----------
+function buildSrc(){
+  const box = $('#srcBody');
+  box.innerHTML = '';
+  sources.forEach((x,i) => {
+    const d = document.createElement('div'); d.className='fld';
+    d.innerHTML =
+      '<div style="display:flex;gap:9px;align-items:flex-end">'+
+        '<div style="flex:1"><label>Название</label><input class="sn" value=""></div>'+
+        '<div style="width:92px"><label>Ставка, %</label><input class="sr2" inputmode="decimal" value="'+x.r+'"></div>'+
+        '<button class="line-del" aria-label="Удалить">×</button>'+
+      '</div>';
+    d.querySelector('.sn').value = x.n;
+    d.querySelector('.sn').onblur = e => { x.n = e.target.value.trim() || 'Без названия'; saveSources(); render(); };
+    d.querySelector('.sr2').onblur = e => {
+      const v = parseFloat(String(e.target.value).replace(',','.'));
+      x.r = isNaN(v) ? 0 : Math.max(0, Math.min(100, v));
+      saveSources(); e.target.value = x.r; render();
+    };
+    d.querySelector('.line-del').onclick = () => {
+      if (sources.length === 1){ alert('Должен остаться хотя бы один источник.'); return; }
+      if (!confirm('Удалить источник «'+x.n+'»?')) return;
+      sources.splice(i,1);
+      if (acc.src >= sources.length) acc.src = 0;
+      saveSources(); buildSrc(); render();
+    };
+    box.appendChild(d);
+  });
+  const add = document.createElement('button');
+  add.className = 'opt act';
+  add.innerHTML = '<div class="opt-main"><div class="opt-t">+ Добавить источник</div>'+
+                  '<div class="opt-s">Агрегатор, площадка или свой канал</div></div>';
+  add.onclick = () => { sources.push({n:'Новый источник', r:0}); saveSources(); buildSrc(); };
+  box.appendChild(add);
+  const note = document.createElement('div');
+  note.className = 'none';
+  note.style.textAlign = 'left';
+  note.textContent = 'Ставка применяется только к работам — стоимость деталей в базу для комиссии не входит. '+
+                     'Изменение ставки не меняет уже сохранённые заказы: в них записан процент, действовавший на момент сохранения.';
+  box.appendChild(note);
+}
+
+
+// ---------- данные клиента ----------
+const FIELDS = [
+  ['g','Документ'],
+  ['docNo','Номер документа','text'],
+  ['docDate','Дата','text'],
+  ['g','Заказчик'],
+  ['client','ФИО заказчика','text'],
+  ['phone','Телефон','text'],
+  ['addrLive','Адрес проживания','text'],
+  ['addrWork','Адрес проведения работ','text'],
+  ['g','Техника'],
+  ['device','Наименование оборудования','text'],
+  ['specs','Характеристики','text'],
+  ['serial','Модель / заводской №','text'],
+  ['devPrice','Цена оборудования, ₽','text'],
+  ['fault','Заявленная неисправность','area'],
+  ['look','Внешний вид, сколы, повреждения','area'],
+  ['g','Деньги и сроки'],
+  ['prepay','Предоплата / аванс, ₽','text'],
+  ['term','Планируемый срок, дней','text'],
+  ['g','Дополнительное соглашение'],
+  ['dsNo','Номер соглашения','text'],
+  ['baseSum','Сумма по основному договору, ₽','text'],
+  ['extraDays','Продление срока, дней','text'],
+  ['g','Гарантийный талон'],
+  ['talonNo','Номер талона','text'],
+  ['seals','Номера гарантийных пломб','text'],
+];
+C.docDate = today();
+C.term = '14';
+
+function buildForm(){
+  const box = $('#formBody');
+  box.innerHTML = '';
+  FIELDS.forEach(f => {
+    if (f[0]==='g'){
+      const g=document.createElement('div'); g.className='grp'; g.textContent=f[1]; box.appendChild(g); return;
+    }
+    const [key,label,kind] = f;
+    const d=document.createElement('div'); d.className='fld';
+    d.innerHTML = '<label for="f_'+key+'">'+label+'</label>'+
+      (kind==='area' ? '<textarea id="f_'+key+'"></textarea>' : '<input id="f_'+key+'" type="text">');
+    const inp = d.querySelector('#f_'+key);
+    inp.value = C[key] || '';
+    inp.oninput = e => { C[key] = e.target.value; };
+    box.appendChild(d);
+  });
+}
+
+
+// Минимальный генератор .xlsx без библиотек: zip без сжатия (метод store).
+// Нужен, потому что приложение обязано работать офлайн — подключить SheetJS нельзя.
+
+const CRC = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++){
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes){
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+const enc = s => new TextEncoder().encode(s);
+
+function zipStore(files){        // files: [{name, data:Uint8Array}]
+  const parts = [], central = [];
+  let offset = 0;
+
+  for (const f of files){
+    const nameB = enc(f.name), crc = crc32(f.data), len = f.data.length;
+    const lf = new Uint8Array(30 + nameB.length);
+    const dv = new DataView(lf.buffer);
+    dv.setUint32(0, 0x04034b50, true);
+    dv.setUint16(4, 20, true);      // version
+    dv.setUint16(6, 0x0800, true);  // UTF-8 имена
+    dv.setUint16(8, 0, true);       // store
+    dv.setUint16(10, 0, true); dv.setUint16(12, 0x21, true);  // время/дата — фиктивные
+    dv.setUint32(14, crc, true);
+    dv.setUint32(18, len, true);
+    dv.setUint32(22, len, true);
+    dv.setUint16(26, nameB.length, true);
+    dv.setUint16(28, 0, true);
+    lf.set(nameB, 30);
+    parts.push(lf, f.data);
+
+    const cd = new Uint8Array(46 + nameB.length);
+    const cv = new DataView(cd.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint16(12, 0, true); cv.setUint16(14, 0x21, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, len, true);
+    cv.setUint32(24, len, true);
+    cv.setUint16(28, nameB.length, true);
+    cv.setUint32(42, offset, true);
+    cd.set(nameB, 46);
+    central.push(cd);
+
+    offset += lf.length + len;
+  }
+
+  const cdSize = central.reduce((a, c) => a + c.length, 0);
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cdSize, true);
+  ev.setUint32(16, offset, true);
+
+  const all = [...parts, ...central, end];
+  const total = all.reduce((a, b) => a + b.length, 0);
+  const out = new Uint8Array(total);
+  let p = 0;
+  for (const b of all){ out.set(b, p); p += b.length; }
+  return out;
+}
+
+const xesc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                          .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const colName = i => {
+  let s = '';
+  i++;
+  while (i > 0){ const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = (i - m - 1) / 26; }
+  return s;
+};
+
+// rows: массив массивов. Значение — число, строка, или {v, b:true} для жирного
+function sheetXml(rows, widths){
+  let cols = '';
+  if (widths && widths.length){
+    cols = '<cols>' + widths.map((w, i) =>
+      `<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('') + '</cols>';
+  }
+  const body = rows.map((r, ri) => {
+    const cells = r.map((c, ci) => {
+      const ref = colName(ci) + (ri + 1);
+      if (c === null || c === undefined || c === '') return '';
+      const bold = (typeof c === 'object' && c.b);
+      const val = (typeof c === 'object') ? c.v : c;
+      const style = bold ? ' s="1"' : (typeof val === 'number' ? ' s="2"' : '');
+      if (typeof val === 'number')
+        return `<c r="${ref}"${style}><v>${val}</v></c>`;
+      return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xesc(val)}</t></is></c>`;
+    }).join('');
+    return `<row r="${ri+1}">${cells}</row>`;
+  }).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${cols}<sheetData>${body}</sheetData></worksheet>`;
+}
+
+function buildXlsx(sheets){       // sheets: [{name, rows, widths}]
+  const files = [];
+  const n = sheets.length;
+
+  files.push({name:'[Content_Types].xml', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+${sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+</Types>`)});
+
+  files.push({name:'_rels/.rels', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`)});
+
+  files.push({name:'xl/workbook.xml', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheets>${sheets.map((s,i)=>`<sheet name="${xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>
+</workbook>`)});
+
+  files.push({name:'xl/_rels/workbook.xml.rels', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}
+<Relationship Id="rId${n+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`)});
+
+  files.push({name:'xl/styles.xml', data: enc(
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0"/></numFmts>
+<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>
+<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>
+<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="3">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`)});
+
+  sheets.forEach((s, i) => {
+    files.push({name:`xl/worksheets/sheet${i+1}.xml`, data: enc(sheetXml(s.rows, s.widths))});
+  });
+
+  return zipStore(files);
+}
+
+
+
+
+// ---------- выгрузка отчёта ----------
+function exportXlsx(a){
+  const H = v => ({v, b:true});
+  const per = PERIODS.find(p => p[0]===period);
+  const head = [
+    ['Отчёт по заказам'],
+    ['Период', per ? per[1] : '', a.from.toLocaleDateString('ru-RU') + ' — ' +
+      new Date(a.to.getTime()-86400000).toLocaleDateString('ru-RU')],
+    ['Сформирован', new Date().toLocaleString('ru-RU')],
+    [],
+  ];
+
+  const orders = [
+    ...head,
+    [H('Дата'),H('Клиент'),H('Телефон'),H('Техника'),H('Источник'),H('Ставка, %'),
+     H('Тип'),H('Работы'),H('Детали, продажа'),H('Скидка, %'),H('Доп. доход'),
+     H('Оборот'),H('Комиссия'),H('Себест. деталей'),H('Чистыми')],
+  ];
+  a.rows.forEach(r => {
+    const m = recMoney(r);
+    orders.push([
+      r.date, r.client||'', r.phone||'', r.device||'',
+      (r.src&&r.src.n)||'—', (r.src&&r.src.r)||0,
+      (r.types||[]).join(', '),
+      m.works, m.partsSale, r.discount||0, m.extra,
+      m.revenue, m.comm, m.partsCost, m.profit,
+    ]);
+  });
+  orders.push([]);
+  orders.push([H('ИТОГО'),'','','','','','',
+    a.agg.works, a.agg.partsSale, '', a.agg.extra,
+    a.agg.revenue, a.agg.comm, a.agg.partsCost, a.agg.profit]);
+
+  const totals = [
+    ...head,
+    [H('Показатель'), H('Значение')],
+    ['Заказов', a.rows.length],
+    ['Оборот', a.agg.revenue],
+    ['Средний чек', a.avg],
+    ['Работы', a.agg.works],
+    ['Детали (продажа)', a.agg.partsSale],
+    ['Себестоимость деталей', a.agg.partsCost],
+    ['Комиссия агрегаторов', a.agg.comm],
+    ['Доход мимо агрегаторов', a.agg.extra],
+    ['Чистый доход', a.agg.profit],
+  ];
+
+  const bySrc = [...head, [H('Источник'),H('Заказов'),H('Оборот'),H('Комиссия'),H('Чистыми')]];
+  Object.entries(a.bySrc).sort((x,y)=>y[1].revenue-x[1].revenue)
+    .forEach(([n,v]) => bySrc.push([n, v.n, v.revenue, v.comm, v.profit]));
+
+  const byType = [...head, [H('Тип'),H('Заказов'),H('Оборот')]];
+  Object.entries(a.byType).sort((x,y)=>y[1].revenue-x[1].revenue)
+    .forEach(([n,v]) => byType.push([n, v.n, v.revenue]));
+
+  const data = buildXlsx([
+    {name:'Заказы',       rows:orders, widths:[11,20,15,18,16,9,14,10,13,9,11,11,11,13,11]},
+    {name:'Итоги',        rows:totals, widths:[26,14]},
+    {name:'По источникам',rows:bySrc,  widths:[22,10,12,12,12]},
+    {name:'По типам',     rows:byType, widths:[18,10,12]},
+  ]);
+
+  const name = 'Отчёт_' + new Date().toISOString().slice(0,10) + '.xlsx';
+  const blob = new Blob([data], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const file = (typeof File !== 'undefined') ? new File([blob], name, {type:blob.type}) : null;
+
+  if (file && navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file], title:name}).catch(()=>{});
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a2 = document.createElement('a');
+  a2.href = url; a2.download = name;
+  document.body.appendChild(a2); a2.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a2.remove(); }, 1500);
+}
+
+
+
+
+// ---------- карточка заказа ----------
+let cardId = null;
+
+function openCard(id){
+  cardId = id;
+  buildCard();
+  $('#card').classList.add('on');
+}
+function curRec(){ return store && store.find(r => r.id === cardId); }
+function persist(msg){
+  const r = curRec();
+  if (r && msg) logTo(r, msg);
+  saveStore();
+  buildCard();
+  buildBoard();
+}
+
+function buildCard(){
+  const box = $('#cardBody');
+  const r = curRec();
+  box.innerHTML = '';
+  if (!r){ box.innerHTML = '<div class="none">Заказ не найден.</div>'; return; }
+
+  const head = document.createElement('div');
+  head.className = 'fld';
+  head.innerHTML = '<div style="font-size:17px;font-weight:600"></div>'+
+    '<div style="font-size:12.5px;color:var(--muted);margin-top:3px"></div>';
+  head.children[0].textContent = r.client || 'Без имени';
+  head.children[1].textContent = r.date + '  ·  ' + (r.device || 'техника не указана') +
+      '  ·  ' + fmt(r.total) + ' ₽  ·  ' + ((r.src && r.src.n) || 'источник не указан');
+  box.appendChild(head);
+
+  sec(box, 'Статус');
+  const ch = document.createElement('div'); ch.className='chips';
+  STATUSES.forEach(st => {
+    const b = document.createElement('button');
+    const on = (r.status || 'new') === st.k;
+    b.className = 'chip2' + (on ? ' on' : '');
+    if (on){ b.style.background = st.c; b.style.borderColor = st.c; }
+    else   { b.style.color = st.c; }
+    b.textContent = st.t;
+    b.onclick = () => {
+      if ((r.status||'new') === st.k) return;
+      r.status = st.k;
+      persist('Статус: ' + st.t);
+    };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+
+  sec(box, 'Комментарии');
+  const add = document.createElement('div'); add.className='fld';
+  add.innerHTML = '<textarea id="cmt" placeholder="Что важно помнить по этому заказу"></textarea>'+
+    '<button class="btn btn-ghost" id="bCmt" style="margin-top:7px">Добавить</button>';
+  box.appendChild(add);
+  add.querySelector('#bCmt').onclick = () => {
+    const v = add.querySelector('#cmt').value.trim();
+    if (!v) return;
+    r.comments = r.comments || [];
+    r.comments.unshift({at: new Date().toISOString(), t: v});
+    persist('Комментарий добавлен');
+  };
+  (r.comments || []).forEach((c, i) => {
+    const d = document.createElement('div'); d.className='trow';
+    d.innerHTML = '<span></span><button class="line-del" aria-label="Удалить">×</button>';
+    const sp = d.querySelector('span');
+    sp.textContent = c.t;
+    const em = document.createElement('em');
+    em.style.display = 'block';
+    em.textContent = new Date(c.at).toLocaleString('ru-RU');
+    sp.appendChild(em);
+    d.querySelector('.line-del').onclick = () => {
+      if (!confirm('Удалить комментарий?')) return;
+      r.comments.splice(i,1); persist('Комментарий удалён');
+    };
+    box.appendChild(d);
+  });
+
+  sec(box, 'Фото и документы');
+  const up = document.createElement('div'); up.className='fld';
+  up.innerHTML = '<input type="file" id="fup" multiple accept="image/*,.pdf,.doc,.docx,.heic">'+
+    '<div style="font-size:11.5px;color:var(--muted);margin-top:5px">Хранятся в этом телефоне, в облако не уходят</div>';
+  box.appendChild(up);
+  up.querySelector('#fup').onchange = async e => {
+    const list = Array.from(e.target.files || []);
+    if (!list.length) return;
+    if (!idb){ alert('Телефон не дал доступ к хранилищу файлов — прикрепить не получится.'); return; }
+    for (const f of list){
+      const id = 'f' + Date.now() + Math.random().toString(36).slice(2,7);
+      try{
+        await putFile({id, blob: f, name: f.name, type: f.type});
+        r.files = r.files || [];
+        r.files.unshift({id, name: f.name, type: f.type, size: f.size, at: new Date().toISOString()});
+      }catch(err){
+        alert('Не удалось сохранить «' + f.name + '». Возможно, в телефоне кончилось место.');
+      }
+    }
+    persist('Прикреплено файлов: ' + list.length);
+  };
+  (r.files || []).forEach((f, i) => {
+    const d = document.createElement('div'); d.className='trow';
+    d.innerHTML = '<span></span><button class="btn btn-ghost" style="min-height:34px;padding:0 10px">Открыть</button>'+
+                  '<button class="line-del" aria-label="Удалить">×</button>';
+    d.querySelector('span').textContent = f.name + '  ·  ' + Math.round((f.size||0)/1024) + ' КБ';
+    d.querySelector('.btn').onclick = async () => {
+      try{
+        const rec = await getFile(f.id);
+        if (!rec){ alert('Файл не найден в хранилище.'); return; }
+        const url = URL.createObjectURL(rec.blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+      }catch(err){ alert('Не удалось открыть файл.'); }
+    };
+    d.querySelector('.line-del').onclick = async () => {
+      if (!confirm('Удалить «' + f.name + '»?')) return;
+      await delFile(f.id);
+      r.files.splice(i,1);
+      persist('Файл удалён');
+    };
+    box.appendChild(d);
+  });
+
+  sec(box, 'История изменений');
+  (r.history || []).forEach(h => {
+    const d = document.createElement('div'); d.className='trow';
+    d.innerHTML = '<span></span>';
+    const sp = d.querySelector('span');
+    sp.textContent = h.t;
+    const em = document.createElement('em');
+    em.style.display = 'block';
+    em.textContent = new Date(h.at).toLocaleString('ru-RU');
+    sp.appendChild(em);
+    box.appendChild(d);
+  });
+
+  const act = document.createElement('div');
+  act.style.padding = '16px 14px 30px';
+  act.innerHTML = '<button class="btn btn-main" id="bLoad" style="width:100%">Позиции и расчёт</button>'+
+    '<button class="btn btn-ghost" id="bDel" style="width:100%;margin-top:9px">Удалить заказ</button>';
+  box.appendChild(act);
+  act.querySelector('#bWiz').onclick = () => { openOrder(r); $('#card').classList.remove('on'); openWiz(r.id); };
+  act.querySelector('#bLoad').onclick = () => {
+    openOrder(r);
+    $('#card').classList.remove('on');
+    location.href = 'index.html';
+  };
+  act.querySelector('#bDel').onclick = async () => {
+    if (!confirm('Удалить заказ «' + (r.client||'без имени') + '» вместе с файлами?')) return;
+    for (const f of (r.files||[])) { await delFile(f.id); }
+    delOrder(r.id);
+    if (curId === r.id){ order=[]; discount=0; dsel.value=0; curId=null; resetAcc(); estimate=null; }
+    $('#card').classList.remove('on');
+    buildBoard();
+  };
+}
+
+
+// ---------- аналитика ----------
+let period = 'month';
+window.__period = 'month';
+let dFrom = '', dTo = '';
+
+function periodRange(p){
+  const period = p || window.__period || 'month';
+  const now = new Date();
+  const d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (period === 'today') return [d0, new Date(d0.getTime()+86400000)];
+  if (period === 'week'){
+    const wd = (d0.getDay()+6)%7;                  // понедельник — начало недели
+    const from = new Date(d0.getTime() - wd*86400000);
+    return [from, new Date(d0.getTime()+86400000)];
+  }
+  if (period === 'month') return [new Date(now.getFullYear(), now.getMonth(), 1),
+                                  new Date(d0.getTime()+86400000)];
+  if (period === 'year')  return [new Date(now.getFullYear(), 0, 1),
+                                  new Date(d0.getTime()+86400000)];
+  const f = dFrom ? new Date(dFrom+'T00:00:00') : new Date(2000,0,1);
+  const t = dTo   ? new Date(dTo  +'T00:00:00') : d0;
+  return [f, new Date(t.getTime()+86400000)];
+}
+
+function recMoney(r){
+  // у старых записей учётных полей нет — считаем их прямыми заказами
+  if (r.m) return r.m;
+  return money(r.lines, r.discount, (r.src&&r.src.r)||0, r.extra||0);
+}
+
+function analData(p){
+  if (!store) return null;
+  const [from, to] = periodRange(p);
+  const rows = store.filter(r => {
+    const d = new Date(r.saved);
+    return d >= from && d < to;
+  }).sort((a,b) => new Date(b.saved) - new Date(a.saved));
+
+  const agg = {revenue:0, profit:0, comm:0, partsCost:0, extra:0, works:0, partsSale:0};
+  const bySrc = {}, byType = {};
+  rows.forEach(r => {
+    const m = recMoney(r);
+    ['revenue','profit','comm','partsCost','extra','works','partsSale'].forEach(k => agg[k] += (m[k]||0));
+    const sn = (r.src && r.src.n) || 'Не указан';
+    bySrc[sn] = bySrc[sn] || {n:0, revenue:0, profit:0, comm:0};
+    bySrc[sn].n++; bySrc[sn].revenue += m.revenue; bySrc[sn].profit += m.profit; bySrc[sn].comm += m.comm;
+    const ts = (r.types && r.types.length) ? r.types : ['Без типа'];
+    ts.forEach(t => {
+      byType[t] = byType[t] || {n:0, revenue:0};
+      byType[t].n++; byType[t].revenue += m.revenue;
+    });
+  });
+  const avg = rows.length ? Math.round(agg.revenue/rows.length) : 0;
+  return {rows, agg, bySrc, byType, avg, from, to};
+}
+
+const PERIODS = [['today','Сегодня'],['week','Неделя'],['month','Месяц'],['year','Год'],['custom','Свой']];
+
+function buildAnal(){
+  const box = $('#analBody');
+  box.innerHTML = '';
+
+  const ch = document.createElement('div'); ch.className='chips';
+  PERIODS.forEach(([k,t]) => {
+    const b = document.createElement('button');
+    b.className = 'chip2' + (period===k ? ' on' : '');
+    b.textContent = t;
+    b.onclick = () => { period = k; window.__period = k; buildAnal(); };
+    ch.appendChild(b);
+  });
+  box.appendChild(ch);
+
+  if (period === 'custom'){
+    const d = document.createElement('div'); d.className='dates';
+    d.innerHTML = '<input type="date" id="dF" value="'+dFrom+'"><input type="date" id="dT" value="'+dTo+'">';
+    box.appendChild(d);
+    d.querySelector('#dF').onchange = e => { dFrom = e.target.value; buildAnal(); };
+    d.querySelector('#dT').onchange = e => { dTo = e.target.value; buildAnal(); };
+  }
+
+  const a = analData();
+  if (!a){
+    box.insertAdjacentHTML('beforeend','<div class="none">Архив недоступен — телефон не разрешил хранить данные.</div>');
+    return;
+  }
+  if (!a.rows.length){
+    box.insertAdjacentHTML('beforeend','<div class="none">За этот период заказов нет.</div>');
+    return;
+  }
+
+  const k = document.createElement('div'); k.className='kpis';
+  k.innerHTML =
+    kpi('Оборот', a.agg.revenue) +
+    kpi('Чистыми', a.agg.profit, 'good') +
+    '<div class="kpi"><i>Заказов</i><b>'+a.rows.length+'</b></div>' +
+    kpi('Средний чек', a.avg) +
+    kpi('Комиссия агрегаторов', a.agg.comm, 'bad') +
+    kpi('Себестоимость деталей', a.agg.partsCost, 'bad');
+  box.appendChild(k);
+
+  if (a.agg.extra){
+    const e = document.createElement('div'); e.className='kpis';
+    e.innerHTML = kpi('Доход мимо агрегаторов', a.agg.extra) +
+                  kpi('Продажа деталей', a.agg.partsSale);
+    box.appendChild(e);
+  }
+
+  sec(box, 'По источникам');
+  Object.entries(a.bySrc).sort((x,y)=>y[1].revenue-x[1].revenue).forEach(([n,v]) => {
+    const r = document.createElement('div'); r.className='trow';
+    r.innerHTML = '<span></span><b>'+fmt(v.revenue)+' ₽</b>';
+    r.querySelector('span').innerHTML = '';
+    r.querySelector('span').append(n);
+    const em = document.createElement('em');
+    em.textContent = '  ·  ' + v.n + ' зак.' + (v.comm ? '  ·  комиссия ' + fmt(v.comm) + ' ₽' : '');
+    r.querySelector('span').appendChild(em);
+    box.appendChild(r);
+  });
+
+  sec(box, 'По типам');
+  Object.entries(a.byType).sort((x,y)=>y[1].revenue-x[1].revenue).forEach(([n,v]) => {
+    const r = document.createElement('div'); r.className='trow';
+    r.innerHTML = '<span></span><b>'+fmt(v.revenue)+' ₽</b>';
+    r.querySelector('span').textContent = n + '  ·  ' + v.n + ' зак.';
+    box.appendChild(r);
+  });
+
+  sec(box, 'Заказы за период');
+  a.rows.forEach(r => {
+    const m = recMoney(r);
+    const el = document.createElement('div'); el.className='trow';
+    el.innerHTML = '<span></span><b>'+fmt(m.revenue)+' ₽</b>';
+    el.querySelector('span').textContent =
+      r.date + '  ·  ' + (r.client || 'без имени') + '  ·  ' + ((r.src&&r.src.n)||'—');
+    box.appendChild(el);
+  });
+
+  const btn = document.createElement('div');
+  btn.style.padding = '16px 14px 30px';
+  btn.innerHTML = '<button class="btn btn-main" id="bXls" style="width:100%">Выгрузить в Excel</button>';
+  box.appendChild(btn);
+  btn.querySelector('#bXls').onclick = () => exportXlsx(a);
+}
+function sec(box, t){
+  const d = document.createElement('div'); d.className='tsec'; d.textContent = t; box.appendChild(d);
+}
+
+
+// ---------- документы ----------
+const fill = (v,w) => v && String(v).trim()
+  ? '<span class="fill">'+esc(v)+'</span>'
+  : '<span class="fill" style="min-width:'+(w||120)+'px">&nbsp;</span>';
+
+function rowsTable(cols, src){
+  const list = src || order;
+  // cols: 'full' — №/наим/кол/цена/стоим/гарантия ; 'short' — №/наим/стоим/гарантия
+  let h = '<table><tr>';
+  h += cols==='full'
+    ? '<th style="width:6%">№</th><th>Наименование услуг, деталей и материалов</th><th style="width:9%">Кол-во</th><th style="width:13%">Цена</th><th style="width:14%">Стоимость</th><th style="width:13%">Гарантия, дней</th>'
+    : '<th style="width:6%">№</th><th>Наименование услуг, деталей и материалов</th><th style="width:18%">Стоимость, руб.</th><th style="width:15%">Гарантия</th>';
+  h += '</tr>';
+  list.forEach((l,i) => {
+    const sum = l.price*l.qty, w = warranty(l);
+    h += '<tr><td class="n">'+(i+1)+'</td><td>'+esc(nameOf(l))+'</td>';
+    h += cols==='full'
+      ? '<td class="c">'+l.qty+'</td><td class="r">'+fmt(l.price)+'</td><td class="r">'+fmt(sum)+'</td><td class="c">'+(w?w:'—')+'</td>'
+      : '<td class="r">'+fmt(sum)+'</td><td class="c">'+(w?w+' дн.':'—')+'</td>';
+    h += '</tr>';
+  });
+  const need = list.length ? 0 : 3;   // пустые строки только для незаполненного бланка
+  for (let i=0;i<need;i++)
+    h += '<tr><td class="n">&nbsp;</td><td></td><td></td><td></td>'+(cols==='full'?'<td></td><td></td>':'')+'</tr>';
+  return h + '</table>';
+}
+
+function moneyBlock(){
+  const t = totals();
+  let h = '<p class="tot"><b>Общая цена работ и материалов:</b> '+fill(fmt(t.gross)+' руб.');
+  h += ' &nbsp; <b>Сумма скидки:</b> '+fill((t.cut?fmt(t.cut):'0')+' руб.');
+  h += ' &nbsp; <b>Сумма итого:</b> '+fill(fmt(t.net)+' руб.')+'</p>';
+  h += '<p class="tot"><b>Внесен аванс:</b> '+fill(C.prepay?fmt(+String(C.prepay).replace(/[^0-9]/g,''))+' руб.':'')+'</p>';
+  return h;
+}
+
+
+// Подпись Исполнителя: сюда встанет прозрачный PNG, когда будет фото.
+// Пока пусто — Исполнитель тоже расписывается пальцем.
+const EXEC_SIGN = DB.sign || '';
+
+function sigOne(who, tag){
+  const id = who+'-'+tag;
+  const inner = (who==='exec' && EXEC_SIGN)
+    ? '<img class="sigimg" src="'+EXEC_SIGN+'" alt="Подпись">'
+    : '<canvas class="sigpad" data-pad="'+id+'"></canvas>';
+  const cap = who==='exec' ? 'Савинов Д.В.' : (esc(C.client||'') || '____________________');
+  return '<div class="sigbox">'+inner+'</div><div class="sigcap">'+cap+'</div>'+
+    ((who==='exec' && EXEC_SIGN) ? ''
+      : '<button class="sigclr" data-clr="'+id+'">Очистить</button>'+
+        '<div class="sighint">Распишитесь пальцем в рамке выше</div>');
+}
+function sigPair(l, r, tag, extra){
+  return '<div class="sig"><div><b>'+l+'</b>'+sigOne('exec',tag)+'</div>'+
+         '<div><b>'+r+'</b>'+sigOne('client',tag)+(extra||'')+'</div></div>';
+}
+
+function initPads(){
+  const usePointer = !!window.PointerEvent;
+  document.querySelectorAll('#docBody .sigpad').forEach(cv => {
+    const dpr = window.devicePixelRatio || 1;
+    const w = cv.clientWidth || 260, h = 72;
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    const ctx = cv.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.lineWidth = 1.8; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#000';
+    let on = false;
+    const pos = e => {
+      const r = cv.getBoundingClientRect();
+      const p = (e.touches && e.touches[0]) ? e.touches[0] : e;
+      return [p.clientX-r.left, p.clientY-r.top];
+    };
+    const start = e => { e.preventDefault(); on=true; const [x,y]=pos(e); ctx.beginPath(); ctx.moveTo(x,y); };
+    const move  = e => { if(!on) return; e.preventDefault(); const [x,y]=pos(e); ctx.lineTo(x,y); ctx.stroke(); };
+    const end   = () => { on=false; };
+    if (usePointer){
+      cv.addEventListener('pointerdown',start);
+      cv.addEventListener('pointermove',move);
+      cv.addEventListener('pointerup',end);
+      cv.addEventListener('pointercancel',end);
+      cv.addEventListener('pointerleave',end);
+    } else {
+      cv.addEventListener('touchstart',start,{passive:false});
+      cv.addEventListener('touchmove',move,{passive:false});
+      cv.addEventListener('touchend',end);
+      cv.addEventListener('mousedown',start);
+      cv.addEventListener('mousemove',move);
+      cv.addEventListener('mouseup',end);
+    }
+  });
+  document.querySelectorAll('#docBody .sigclr').forEach(b => {
+    b.onclick = () => {
+      const cv = document.querySelector('#docBody .sigpad[data-pad="'+b.dataset.clr+'"]');
+      if (cv) cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+    };
+  });
+}
+
+const EXEC = 'Самозанятый Савинов Дмитрий Владимирович (ИНН 420217238281, НПД), тел.: 8-999-499-5543';
+
+function docNaryad(){
+  const t = totals();
+  const e = estMoney();
+  const tblEst = rowsTable('short', estimate ? estimate.lines : null);
+  const tblAct = rowsTable('short');
+  const changed = !!estimate;
+  return `
+<h1>ДОГОВОР-ЗАКАЗ-НАРЯД № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</h1>
+<p><b>Исполнитель:</b> ${EXEC}</p>
+<p><b>Заказчик (ФИО):</b> ${fill(C.client,200)}, тел.: ${fill(C.phone,110)}</p>
+<p><b>Адрес проживания Заказчика:</b> ${fill(C.addrLive,260)}</p>
+<p><b>Адрес проведения работ:</b> ${fill(C.addrWork,260)}</p>
+
+<h2>1. ПРИЕМКА ТЕХНИКИ И ХАРАКТЕРИСТИКИ</h2>
+<p>Оборудование/Техника: ${fill(C.device,180)}, Модель/Заводской №: ${fill(C.serial,150)}</p>
+<p>Заявленная неисправность: ${fill(C.fault,300)}</p>
+<p>Внешний вид, сколы, повреждения при приеме: ${fill(C.look,280)}</p>
+
+<div class="terms"><h2>2. УСЛОВИЯ ОКАЗАНИЯ УСЛУГ И ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h2>
+<p>2.1. Срок выполнения работ: от 1 до 14 рабочих дней. Срок может быть автоматически увеличен Исполнителем в одностороннем порядке в случаях: сложности/плавающего характера диагностики, отсутствия запчастей у поставщиков (на срок поставки), а также временной нетрудоспособности Исполнителя по состоянию здоровья.</p>
+<p>2.2. Связь и согласование: Все уведомления, согласование сметы и сроков производятся телефонным звонком на номер Заказчика либо через мессенджеры MAX и Telegram. Письменное подтверждение в мессенджере («Да», «Согласен») имеет полную юридическую силу (ст. 434 ГК РФ). При увеличении объема/стоимости работ Исполнитель досогласовывает изменения указанными средствами связи.</p>
+<p>2.3. Предоплата и отказ от ремонта: В случае отказа Заказчика от ремонта после проведения диагностики или доставки техники, внесенная предоплата Заказчику не возвращается и удерживается Исполнителем в качестве компенсации фактически понесенных расходов (ст. 32 Закона РФ «О ЗПП», ст. 782 ГК РФ). Фиксированная стоимость диагностики/приема без транспортировки — 1 500 руб., с транспортировкой/доставкой — 2 500 руб.</p>
+<p>2.4. Ранее ремонтировавшаяся техника: Исполнитель не несет ответственности за скрытые дефекты, неработоспособность или выбытие из строя узлов, если техника ранее подвергалась ремонту, вмешательству третьих лиц, имеет следы неквалифицированного вскрытия, пайки или залития.</p>
+<p>2.5. Риски диагностики: При диагностике техники со скрытыми дефектами (микротрещины плат, межслойный обрыв, коррозия/залитие) возможно полное или частичное проявление скрытых неисправностей и выход техники из строя. Исполнитель не несет ответственности за изменение состояния техники в процессе диагностики, обусловленное естественным износом или скрытыми повреждениями (ст. 401 ГК РФ).</p>
+<p>2.6. Хранение и утилизация: При незаборе Оборудования Заказчиком в течение 30 календарных дней после уведомления о готовности/диагностике, начисляется плата за хранение — 100 руб./сутки. По истечении 60 дней Исполнитель вправе утилизировать Оборудование либо реализовать его в счет покрытия расходов (ст. 899 ГК РФ).</p>
+<p>2.7. Сохранность данных: Исполнитель не несет ответственности за сохранность ПО, персональных данных и информации на накопителях техники. Заказчик обязан самостоятельно создать резервную копию до сдачи техники.</p>
+<p>2.8. Персональные данные: Подписывая настоящий Договор, Заказчик дает согласие на обработку своих персональных данных (ФИО, телефон, адрес) в целях исполнения Договора (ФЗ № 152-ФЗ).</p>
+<p>2.9. Предмет и привлечение третьих лиц: Заказчик поручает, а Исполнитель обязуется выполнить работы по диагностике, ремонту, настройке и техническому обслуживанию Оборудования, указанные в разделе 3. Стоимость определяется Прейскурантом Исполнителя. Исполнитель вправе привлечь к исполнению третьих лиц, оставаясь ответственным перед Заказчиком за результат.</p>
+<p>2.10. Оплата: Заказчик оплачивает работы непосредственно после подписания Акта выполненных работ (раздел 4), за вычетом внесенной предоплаты.</p>
+<p>2.11. Ознакомление с расценками: До заключения Договора Заказчик ознакомился с Прейскурантом Исполнителя, перечнем работ, сроками и условиями предоставления гарантии в полном объеме.</p>
+<p>2.12. Недостатки при приемке: Обнаруженные Заказчиком при приемке недостатки фиксируются в Акте выполненных работ. Видимые недостатки, не отраженные в Акте, безвозмездному устранению не подлежат.</p>
+<p>2.13. Замененные детали: Заказчик дает согласие на оставление замененных деталей и расходных материалов Исполнителю, если иное прямо не указано в разделе 4.</p>
+<p>2.14. Гарантийный ремонт: Устранение недостатков по гарантии производится в срок не более 45 (сорока пяти) календарных дней с момента предоставления Заказчиком доступа к Оборудованию.</p>
+
+
+<h2>2.15. СОГЛАШЕНИЕ ОБ ЭЛЕКТРОННОЙ ПОДПИСИ</h2>
+<p>2.15.1. Стороны договорились, что настоящий документ, приложения и акты к нему могут подписываться простой электронной подписью в порядке, установленном ст. 160 ГК РФ, ст. 6 и ст. 9 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи».</p>
+<p>2.15.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
+<p>2.15.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
+<p>2.15.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
+<p>2.15.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (MAX, Telegram) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
+<p>2.15.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+</div>
+<h2>3. СОГЛАСОВАНИЕ СМЕТЫ И СТОИМОСТИ (заполняется и подписывается ДО начала работ)</h2>
+${tblEst}
+<p class="tot"><b>ОБЩАЯ СТОИМОСТЬ:</b> ${fill(fmt(e.net)+' руб.')}
+&nbsp; <b>Предоплата:</b> ${fill(C.prepay?fmt(+String(C.prepay).replace(/[^0-9]/g,''))+' руб.':'',90)}
+&nbsp; <b>Планируемый срок:</b> ${fill(C.term,50)} дней.</p>
+${e.cut ? '<p class="tot">В том числе скидка — '+fmt(e.cut)+' руб. (сумма без скидки '+fmt(e.gross)+' руб.)</p>' : ''}
+<p class="conf"><b>Перед началом работ.</b> С Прейскурантом, перечнем, сроками и полной стоимостью работ ознакомлен. Стоимость мне понятна и со мной согласована до начала работ; возражений по цене не имею. Предупреждён о возможности выявления скрытых дефектов и о том, что при изменении объёма работ стоимость досогласовывается отдельно. На обработку персональных данных согласен. Работы разрешаю.</p>
+${sigPair('Исполнитель (работы принял на диагностику):','Заказчик (работы разрешаю):','n1')}
+
+<h2>4. АКТ ВЫПОЛНЕННЫХ РАБОТ И ПРИЕМА-ПЕРЕДАЧИ ТЕХНИКИ (заполняется ПОСЛЕ ремонта)</h2>
+${tblAct}
+<p class="tot"><b>ИТОГО К ОПЛАТЕ:</b> ${fill(fmt(t.net)+' руб.')}</p>
+${changed && t.net !== e.net ? '<p class="conf"><b>Изменение объёма работ.</b> В ходе выполнения выявлена необходимость работ, не вошедших в первоначальную смету раздела 3. Состав, стоимость и срок дополнительных работ согласованы с Заказчиком до их выполнения в порядке п. 2.2 Договора. Смета по разделу 3 составляла '+fmt(e.net)+' руб., итоговая стоимость — '+fmt(t.net)+' руб. Заказчик подтверждает согласование изменений и отсутствие возражений по итоговой сумме.</p>' : ''}
+<p class="conf"><b>После выполнения работ.</b> Работы выполнены в полном объёме и в согласованный срок. Результат проверен в моём присутствии. Претензий по объёму, качеству, срокам и стоимости работ не имею. Итоговая стоимость соответствует согласованной; скрытых и навязанных услуг не выявлено. Оборудование получено в исправном состоянии, внешних повреждений сверх указанных при приёмке нет.</p>
+${sigPair('Исполнитель:','Заказчик:','n2','<div class="sigcap">Дата: «____» ____________ 2026 г.</div>')}`;
+}
+
+function docRabot(){
+  return `
+<h1>Договор на выполнение работ № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</h1>
+<p>Савинов Дмитрий Владимирович, зарегистрированный в ФНС в качестве налогоплательщика налога на профессиональный доход в соответствии с ФЗ от 27.11.2018 №422-ФЗ (ИНН 420217238281), именуемый в дальнейшем «<b>Исполнитель</b>», с одной стороны, и ${fill(C.client,240)}, именуемый в дальнейшем <b>Заказчик</b>, совместно именуемые Стороны, заключили настоящий Договор на следующих условиях:</p>
+
+<p>1.1. Заказчик поручает, а Исполнитель обязуется выполнить работы по диагностике, ремонту, настройке и техническому обслуживанию техники и оборудования — компьютеров, ноутбуков, телевизоров, смартфонов и планшетов, принтеров и МФУ, сетевого оборудования, а также иной электронной и бытовой техники (далее — Оборудование), указанные в п. 1.3 Договора. Заказчик обязуется принять результаты работ и оплатить их и/или запчасти и расходные материалы. Стоимость работ определяется в соответствии с Прейскурантом Исполнителя и указывается в настоящем договоре. Исполнитель вправе привлечь к исполнению своих обязательств других лиц, оставаясь ответственным перед Заказчиком за выполняемые такими третьими лицами работы.</p>
+
+<p>1.2. Работы на основании Договора выполняются в отношении следующего Оборудования :</p>
+<table>
+  <tr><th>Наименование оборудования</th><th>Характеристики</th><th>Цена оборудования</th><th>Неисправность со слов заказчика</th></tr>
+  <tr><td>${esc(C.device||'')}&nbsp;</td><td>${esc(C.specs||'')}&nbsp;</td><td>${esc(C.devPrice||'')}&nbsp;</td><td>${esc(C.fault||'')}&nbsp;</td></tr>
+</table>
+
+<p>1.3. Исполнитель обязуется выполнить следующие работы:</p>
+${rowsTable('full')}
+${moneyBlock()}
+
+<div class="terms"><p>1.4. Заказчик обязуется оплатить работы непосредственно после подписания акта выполненных работ.</p>
+<p>1.5. В случае невозможности выполнения работ в месте нахождения Заказчика работы проводятся в месте нахождения Исполнителя. Срок выполнения работ составляет не более 60 рабочих дней с момента заключения настоящего договора.</p>
+<p>1.6. До заключения договора Заказчик ознакомился с расценками, содержащимися в Прейскуранте Исполнителя, условиями предоставления гарантии на отдельные виды работ, в полном объеме. До заключения договора до Заказчика Исполнителем доведена информация о выполняемых работах, гарантийных сроках на оказываемые услуги в объеме, предусмотренном действующим законодательством.</p>
+<p>1.7. Исполнитель несет гарантийные обязательства за работы, выполненные в соответствии с настоящим Договором в случае, если в соответствующем разделе п. 1.3 Договора установлен гарантийный срок. В случае обнаружения Заказчиком недостатков работ в момент их приемки об этом делается пометка в акте выполненных работ. В случае, если видимые недостатки, на наличие которых впоследствии ссылается Заказчик, не были отражены в акте выполненных работ, данные недостатки не подлежат устранению Исполнителем на безвозмездной основе.</p>
+<p>1.8. Заказчик дает согласие на оставление замененных деталей и расходных материалов Исполнителю.</p>
+<p>1.9. Гарантийный ремонт осуществляется в срок не более 45 (сорока пяти) дней с момента предоставления Заказчиком Исполнителю доступа к объекту ремонта.</p>
+
+
+<h2>1.10. СОГЛАШЕНИЕ ОБ ЭЛЕКТРОННОЙ ПОДПИСИ</h2>
+<p>1.10.1. Стороны договорились, что настоящий документ, приложения и акты к нему могут подписываться простой электронной подписью в порядке, установленном ст. 160 ГК РФ, ст. 6 и ст. 9 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи».</p>
+<p>1.10.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
+<p>1.10.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
+<p>1.10.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
+<p>1.10.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (MAX, Telegram) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
+<p>1.10.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+</div>
+<p class="conf"><b>Перед началом работ.</b> С Прейскурантом, перечнем, сроками и полной стоимостью работ ознакомлен. Стоимость мне понятна и со мной согласована до начала работ; возражений по цене не имею. Предупреждён о возможности выявления скрытых дефектов и о том, что при изменении объёма работ стоимость досогласовывается отдельно. На обработку персональных данных согласен. Работы разрешаю.</p>
+<p class="conf"><b>После выполнения работ.</b> Работы выполнены в полном объёме и в согласованный срок. Результат проверен в моём присутствии. Претензий по объёму, качеству, срокам и стоимости работ не имею. Итоговая стоимость соответствует согласованной; скрытых и навязанных услуг не выявлено. Оборудование получено в исправном состоянии, внешних повреждений сверх указанных при приёмке нет.</p>
+<h2>РЕКВИЗИТЫ СТОРОН</h2>
+<table>
+  <tr><th style="width:50%">Исполнитель</th><th>Заказчик</th></tr>
+  <tr>
+    <td>Савинов Д.В.<br>ИНН: 420217238281<br>Телефон: 8-999-499-5543${sigOne('exec','r1')}</td>
+    <td>${esc(C.client||'')}<br>Адрес: ${esc(C.addrLive||'')}<br>Телефон: ${esc(C.phone||'')}${sigOne('client','r1')}</td>
+  </tr>
+</table>`;
+}
+
+function docTalon(){
+  return `
+<h1>ГАРАНТИЙНЫЙ ТАЛОН № ${fill(C.talonNo,70)}</h1>
+<p style="text-align:center">к Договору-Заказ-наряду № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</p>
+<table>
+  <tr><td style="width:34%"><b>Исполнитель:</b></td><td>${EXEC}</td></tr>
+  <tr><td><b>Заказчик (ФИО):</b></td><td>${esc(C.client||'')}&nbsp;</td></tr>
+  <tr><td><b>Наименование и модель техники:</b></td><td>${esc(C.device||'')}&nbsp;</td></tr>
+  <tr><td><b>Заводской / Серийный номер (S/N):</b></td><td>${esc(C.serial||'')}&nbsp;</td></tr>
+  <tr><td><b>Номера гарантийных пломб (стикеров):</b></td><td>${esc(C.seals||'')}&nbsp;</td></tr>
+</table>
+
+<h2>1. СРОКИ И УСЛОВИЯ ГАРАНТИЙНОГО ОБСЛУЖИВАНИЯ</h2>
+<p>1.1. Гарантийный срок на выполненные работы и установленные запчасти указан в таблице ниже и исчисляется с даты подписания Акта выполненных работ.</p>
+${rowsTable('short')}
+<div class="terms"><p>1.2. Перечень выполненных работ и установленных деталей, на которые распространяется гарантия, указывается в Договоре-Заказ-наряде.</p>
+<p>1.3. Гарантийное обслуживание предоставляется только при условии сохранности и предъявления оригиналов Договора-Заказ-наряда и настоящего Гарантийного талона.</p>
+<p>1.4. При заявлении о гарантийном случае Исполнитель обязуется прибыть к Заказчику (либо принять технику) для проведения диагностики и устранения недостатков в срок до 10 (десяти) рабочих дней с момента получения обращения (телефонный звонок либо мессенджеры MAX, Telegram).</p>
+
+<h2>2. ГАРАНТИЙНЫЕ ПЛОМБЫ И ОСНОВАНИЯ ДЛЯ ОТКАЗА В ГАРАНТИИ</h2>
+<p>2.1. <b>Контроль целостности:</b> На отремонтированные узлы и корпус Оборудования Исполнитель наносит защитные гарантийные пломбы (стикеры).</p>
+<p>2.2. <b>Нарушение пломб:</b> Повреждение, срыв, переклеивание или отсутствие гарантийных пломб/стикеров полностью аннулирует гарантийные обязательства Исполнителя (ст. 470 ГК РФ).</p>
+<p>2.3. <b>Гарантийное обслуживание НЕ предоставляется в случаях:</b></p>
+<ul>
+<li>Отсутствия или утери оригинала Договора-Заказ-наряда или Гарантийного талона;</li>
+<li>Попадания внутрь техники посторонних предметов, жидкостей, насекомых или грызунов;</li>
+<li>Наличия механических повреждений (трещины, сколы, вмятины), вызванных падением или ударами;</li>
+<li>Поломки, вызванной скачками напряжения в электросети, отсутствием заземления;</li>
+<li>Следов стороннего вмешательства, самостоятельного ремонта или модернизации третьими лицами;</li>
+<li>Нарушения Заказчиком правил эксплуатации, описанных в инструкции к Оборудованию.</li>
+</ul>
+
+<h2>3. ПОРЯДОК ОПЛАТЫ НЕГАРАНТИЙНЫХ / ЛОЖНЫХ ВЫЗОВОВ</h2>
+<p>3.1. Диагностика гарантийного случая проводится Исполнителем на месте или в мастерской.</p>
+<p>3.2. Если по результатам диагностики установлено, что заявленная неисправность не является гарантийным случаем (поломка другого узла, ошибки эксплуатации, срыв пломб, скачок напряжения и т.д.), Заказчик обязуется оплатить стоимость выезда и диагностики в соответствии с действующим Прейскурантом Исполнителя.</p>
+<p>3.3. В случае отказа Заказчика от оплаты нерелевантного/негарантийного выезда, все последующие выезды и повторные обращения Исполнителем выполняются только после предварительной 100% оплаты стоимости выезда и проведения диагностики.</p>
+
+
+<h2>4. СОГЛАШЕНИЕ ОБ ЭЛЕКТРОННОЙ ПОДПИСИ</h2>
+<p>4.1. Стороны договорились, что настоящий документ, приложения и акты к нему могут подписываться простой электронной подписью в порядке, установленном ст. 160 ГК РФ, ст. 6 и ст. 9 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи».</p>
+<p>4.2. Простой электронной подписью Заказчика признаётся совокупность: графического изображения подписи, нанесённого Заказчиком собственноручно на сенсорном экране устройства Исполнителя, и номера телефона Заказчика, указанного в настоящем документе.</p>
+<p>4.3. Простой электронной подписью Исполнителя признаётся графическое изображение его подписи, нанесённое в электронном документе, совместно с номером телефона 8-999-499-5543.</p>
+<p>4.4. Документ, подписанный в указанном порядке, признаётся Сторонами равнозначным документу на бумажном носителе, подписанному собственноручными подписями Сторон, и порождает те же права и обязанности.</p>
+<p>4.5. Экземпляр подписанного документа в формате PDF направляется Исполнителем Заказчику на указанный им номер телефона через мессенджер (MAX, Telegram) либо по электронной почте не позднее рабочего дня, следующего за днём подписания. Направленный экземпляр является доказательством содержания документа и факта его подписания Сторонами.</p>
+<p>4.6. Заказчик обязуется обеспечить конфиденциальность доступа к своему номеру телефона и незамедлительно уведомить Исполнителя о его утрате. До получения такого уведомления все действия, совершённые с использованием указанного номера, считаются совершёнными Заказчиком.</p>
+</div>
+<p>С условиями гарантийного обслуживания, правилами эксплуатации и порядком оплаты негарантийных вызовов ознакомлен и согласен. Пломбы проверены, целостность подтверждаю.</p>
+${sigPair('Исполнитель:','Заказчик:','t1','<div class="sigcap">Дата выдачи: «____» ____________ 2026 г.</div>')}`;
+}
+
+function docDop(){
+  const t = totals();
+  const base = parseInt(String(C.baseSum||'').replace(/[^0-9]/g,''),10) || 0;
+  const was = base, now = base + t.net;
+  return `
+<h1>ДОПОЛНИТЕЛЬНОЕ СОГЛАШЕНИЕ № ${fill(C.dsNo,60)}</h1>
+<p style="text-align:center">к Договору-Заказ-наряду № ${fill(C.docNo,70)} от ${fill(C.docDate,90)}</p>
+<p style="text-align:center">г. ______________ &nbsp;&nbsp; «____» ____________ 2026 г.</p>
+
+<p><b>Исполнитель:</b> ${EXEC}</p>
+<p><b>Заказчик (ФИО):</b> ${fill(C.client,200)}, тел.: ${fill(C.phone,110)}</p>
+<p><b>Оборудование:</b> ${fill(C.device,180)}, Модель/Заводской №: ${fill(C.serial,150)}</p>
+
+<p>1. В ходе выполнения работ по Договору-Заказ-наряду выявлена необходимость проведения дополнительных работ и (или) установки дополнительных деталей и материалов. Стороны пришли к соглашению дополнить перечень работ по Договору следующими позициями:</p>
+${rowsTable('full')}
+${moneyBlock()}
+
+<p>2. Стоимость дополнительных работ и материалов по настоящему соглашению составляет ${fill(fmt(t.net)+' руб.')}${t.cut ? ' (с учётом скидки '+discount+'% в размере '+fmt(t.cut)+' руб.)' : ''}.</p>
+<p>3. Общая стоимость работ по Договору с учётом настоящего соглашения изменяется: было ${fill(base?fmt(was)+' руб.':'',90)} — стало ${fill(base?fmt(now)+' руб.':'',90)}.</p>
+<p>4. Срок выполнения работ по Договору продлевается на ${fill(C.extraDays,45)} рабочих дней с момента подписания настоящего соглашения.</p>
+<p>5. Гарантийные сроки на дополнительные работы и детали указаны в таблице п. 1 настоящего соглашения и исчисляются с даты подписания Акта выполненных работ.</p>
+<p>6. Заказчик подтверждает, что необходимость дополнительных работ, их состав, стоимость и срок с ним согласованы до начала их выполнения. Возражений не имеет, работы разрешает.</p>
+<p>7. Остальные условия Договора-Заказ-наряда остаются неизменными. Настоящее соглашение является неотъемлемой частью Договора, составлено в двух экземплярах и подписывается в порядке, установленном п. 2.15 Договора (простая электронная подпись).</p>
+
+${sigPair('Исполнитель:','Заказчик (работы разрешаю):','d1')}`;
+}
+
+
+
+
+// ---------- вход по коду ----------
+// Код лежит в этом же файле, а файл открыт в публичном репозитории.
+// Поэтому он защищает не от интернета: заказы хранятся только в этом
+// телефоне, по ссылке чужой человек увидит пустое приложение.
+// Код закрывает доступ тому, у кого оказался разблокированный телефон.
+const PINKEY = 'pin.v1';
+const DEF_PIN = '2332';
+function curPin(){
+  try{ return localStorage.getItem(PINKEY) || DEF_PIN; }catch(e){ return DEF_PIN; }
+}
+function setPin(v){
+  try{ localStorage.setItem(PINKEY, v); return true; }catch(e){ return false; }
+}
+
+let pinBuf = '';
+function drawDots(){
+  const d = $('#lockDots');
+  d.innerHTML = '';
+  for (let i = 0; i < 4; i++){
+    const e = document.createElement('i');
+    if (i < pinBuf.length) e.className = 'on';
+    d.appendChild(e);
+  }
+}
+function buildPad(){
+  const pad = $('#pad');
+  pad.innerHTML = '';
+  ['1','2','3','4','5','6','7','8','9','C','0','←'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = k;
+    if (k === 'C' || k === '←') b.className = 'wide';
+    b.onclick = () => {
+      if (k === 'C'){ pinBuf = ''; }
+      else if (k === '←'){ pinBuf = pinBuf.slice(0,-1); }
+      else if (pinBuf.length < 4){ pinBuf += k; }
+      drawDots();
+      $('#lockErr').textContent = '';
+      if (pinBuf.length === 4) setTimeout(tryPin, 120);
+    };
+    pad.appendChild(b);
+  });
+  drawDots();
+}
+function tryPin(){
+  if (pinBuf === curPin()){
+    pinBuf = '';
+    $('#lock').classList.add('off');
+    drawDots();
+  } else {
+    pinBuf = '';
+    drawDots();
+    $('#lockErr').textContent = 'Неверный код';
+  }
+}
+function lockNow(){
+  pinBuf = ''; drawDots();
+  $('#lockErr').textContent = '';
+  $('#lock').classList.remove('off');
+}
+function changePin(){
+  const a = prompt('Новый код из 4 цифр:');
+  if (a === null) return;
+  const v = String(a).replace(/[^0-9]/g,'');
+  if (v.length !== 4){ alert('Нужно ровно 4 цифры.'); return; }
+  const b = prompt('Повторите код:');
+  if (String(b).replace(/[^0-9]/g,'') !== v){ alert('Коды не совпали.'); return; }
+  alert(setPin(v) ? 'Код изменён.' : 'Не удалось сохранить код.');
+}
+
+
+// ---------- резервная копия ----------
+function exportBackup(){
+  if (!store){ alert('Архив недоступен.'); return; }
+  const data = JSON.stringify({v:1, at:new Date().toISOString(), orders:store, sources}, null, 1);
+  const blob = new Blob([data], {type:'application/json'});
+  const name = 'Резервная_копия_' + new Date().toISOString().slice(0,10) + '.json';
+  const f = (typeof File !== 'undefined') ? new File([blob], name, {type:blob.type}) : null;
+  if (f && navigator.canShare && navigator.canShare({files:[f]})){
+    navigator.share({files:[f], title:name}).catch(()=>{});
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+function importBackup(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try{
+        const d = JSON.parse(rd.result);
+        if (!d.orders) throw new Error('не тот файл');
+        if (!confirm('В копии заказов: ' + d.orders.length + '. Заменить текущий архив?')) return;
+        store = d.orders;
+        if (d.sources) { sources = d.sources; saveSources(); }
+        saveStore();
+        alert('Копия загружена. Фото и документы в копию не входят.');
+        render();
+      }catch(e){ alert('Файл не похож на резервную копию.'); }
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+
+
+// ---------- меню ----------
+const MENU = [
+  ['Калькулятор', 'Посчитать новый заказ', () => { location.href = 'index.html'; }],
+  ['Учёт заказа', 'Источник, тип, доход мимо агрегатора', () => {
+      $('#menu').classList.remove('on'); buildAcct(); $('#acct').classList.add('on');
+  }],
+  ['Зафиксировать смету', 'Запомнить состав до выезда — для раздела 3 заказ-наряда', () => {
+      $('#menu').classList.remove('on');
+      estimate ? (confirm('Смета уже зафиксирована ('+estimate.at+'). Сбросить её?') ? clearEstimate() : null)
+               : fixEstimate();
+  }],
+  ['Аналитика', 'Оборот, доход, средний чек, отчёт в Excel', () => {
+      $('#menu').classList.remove('on'); buildAnal(); $('#anal').classList.add('on');
+  }],
+
+  ['Источники и ставки', 'Агрегаторы и проценты комиссии', () => {
+      $('#menu').classList.remove('on'); buildSrc(); $('#srcs').classList.add('on');
+  }],
+  ['Резервная копия', 'Сохранить архив в файл или восстановить из него', () => {
+      $('#menu').classList.remove('on');
+      confirm('ОК — сохранить копию в файл.\nОтмена — загрузить копию из файла.')
+        ? exportBackup() : importBackup();
+  }],
+  ['Сменить код', 'Код для входа в приложение', () => { $('#menu').classList.remove('on'); changePin(); }],
+  ['Заблокировать', 'Закрыть приложение кодом прямо сейчас', () => {
+      $('#menu').classList.remove('on'); lockNow();
+  }],
+];
+function buildMenu(){
+  const box = $('#menuBody');
+  box.innerHTML = '';
+  MENU.forEach(([t,sub,fn]) => {
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = '<div class="opt-main"><div class="opt-t">'+t+'</div><div class="opt-s">'+sub+'</div></div>';
+    b.onclick = fn;
+    box.appendChild(b);
+  });
+}
+
+
+// ---------- оформить ----------
+const OUTS = [
+  ['Данные клиента', 'ФИО, техника, адрес — подставятся во все документы', () => { $('#outs').classList.remove('on'); buildForm(); $('#form').classList.add('on'); }],
+  ['Расчёт текстом', 'Скопировать или отправить в мессенджер', shareText],
+  ['Учёт заказа', 'Источник, тип, доход мимо агрегатора', () => {
+      $('#outs').classList.remove('on'); buildAcct(); $('#acct').classList.add('on'); }],
+  ['Сохранить заказ', 'Записать изменения и отметить в истории', () => saveOrder(false)],
+
+  ['Договор-заказ-наряд', 'Приёмка техники, смета и акт выполненных работ', () => openDoc(docNaryad)],
+  ['Договор на выполнение работ', 'Работы на месте, со скидкой и авансом', () => openDoc(docRabot)],
+  ['Дополнительное соглашение', 'Если после согласования добавились работы', () => openDoc(docDop)],
+  ['Гарантийный талон', 'Со сроками гарантии по каждой позиции', () => openDoc(docTalon)],
+];
+
+function buildOuts(){
+  const box = $('#outList');
+  box.innerHTML = '';
+  OUTS.forEach(([t,s,fn]) => {
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML='<div class="opt-main"><div class="opt-t">'+t+'</div><div class="opt-s">'+s+'</div></div>';
+    b.onclick = fn;
+    box.appendChild(b);
+  });
+}
+
+function openDoc(builder){
+  if (!order.length && !confirm('В заказе нет позиций. Всё равно открыть документ?')) return;
+  $('#docBody').innerHTML = builder();
+  $('#outs').classList.remove('on');
+  $('#docview').classList.add('on');
+  document.querySelector('#docview').scrollTop = 0;
+  requestAnimationFrame(initPads);   // холсты меряются только после показа
+  saveOrder(true);                   // документ оформлен — заказ ложится в архив сам
+}
+
+
+// ---------- текст расчёта ----------
+async function shareText(){
+  if (!order.length){ alert('Заказ пуст.'); return; }
+  const t = totals();
+  let s = 'Расчёт работ от ' + today() + '\n\n';
+  order.forEach((l,n) => {
+    s += (n+1)+'. '+nameOf(l)+'\n   '+
+         (l.qty>1 ? l.qty+' × '+fmt(l.price)+' ₽ = ' : '')+fmt(l.price*l.qty)+' ₽\n';
+  });
+  s += '\nСумма: '+fmt(t.gross)+' ₽';
+  if (t.cut) s += '\nСкидка '+discount+'%: −'+fmt(t.cut)+' ₽';
+  s += '\nИтого к оплате: '+fmt(t.net)+' ₽';
+  s += '\n\nСавинов Д.В. — ремонт компьютеров, ТВ и смартфонов\nтел. 8-999-499-5543';
+  try{
+    if (navigator.share){ await navigator.share({text:s}); return; }
+    await navigator.clipboard.writeText(s);
+    alert('Расчёт скопирован — вставьте в мессенджер.');
+  }catch(e){ alert(s); }
+}
+
+// Просим систему закрепить хранилище. Safari решает сам, окна не показывает;
+// запуск с домашнего экрана — один из признаков в его пользу.
+if (navigator.storage && navigator.storage.persist){
+  navigator.storage.persist().catch(()=>{});
+}
+
+
+// ---------- мастер создания заказа ----------
+const DEVICES = ['Ноутбук','Компьютер','Моноблок','Телевизор','Смартфон','Планшет',
+                 'Принтер / МФУ','Роутер','Монитор','Приставка'];
+
+const WIZ = [
+  {t:'Клиент', hint:'Эти данные попадут во все документы.', f:[
+    ['client','ФИО заказчика','text'],
+    ['phone','Телефон','tel'],
+    ['addrLive','Адрес проживания','text'],
+    ['addrWork','Адрес проведения работ','text'],
+  ]},
+  {t:'Техника', hint:'Опишите так, как будет в договоре.', f:[
+    ['device','Наименование техники','device'],
+    ['specs','Характеристики','text'],
+    ['serial','Модель / заводской №','text'],
+    ['fault','Заявленная неисправность','area'],
+    ['look','Внешний вид, сколы, повреждения','area'],
+  ]},
+  {t:'Документы', hint:'Заполните и сразу выгрузите нужные документы в PDF.', f:[
+    ['docNo','Номер документа','text'],
+    ['docDate','Дата','text'],
+    ['prepay','Предоплата, ₽','text'],
+    ['term','Планируемый срок, дней','text'],
+    ['deadline','Готово к дате','date'],
+  ], docs:true},
+  {t:'Учёт', hint:'Это только для вас, в документы не попадает.', f:[
+    ['__src','Источник заказа','src'],
+    ['__types','Тип заказа','types'],
+    ['extra','Доход мимо агрегатора, ₽','accnum'],
+    ['__note','Комментарий к заказу','note'],
+  ]},
+];
+
+let wizStep = 0;
+let wizNote = '';
+
+function openWiz(id){
+  if (id) cardId = id;
+  wizStep = 0;
+  wizNote = '';
+  buildWiz();
+  $('#wiz').classList.add('on');
+}
+
+function buildWiz(){
+  const st = WIZ[wizStep];
+  $('#wizTitle').textContent = (wizStep+1) + ' из ' + WIZ.length + '  ·  ' + st.t;
+
+  const dots = $('#wizDots');
+  dots.innerHTML = '';
+  WIZ.forEach((_, i) => {
+    const e = document.createElement('i');
+    if (i === wizStep) e.className = 'on';
+    else if (i < wizStep) e.className = 'done';
+    dots.appendChild(e);
+  });
+
+  $('#bWizPrev').style.visibility = wizStep === 0 ? 'hidden' : 'visible';
+  $('#bWizNext').textContent = wizStep === WIZ.length-1 ? 'Готово' : 'Далее';
+
+  const box = $('#wizBody');
+  box.innerHTML = '';
+  if (st.hint){
+    const h = document.createElement('div');
+    h.className = 'wizhint'; h.textContent = st.hint;
+    box.appendChild(h);
+  }
+
+  st.f.forEach(([key, label, kind]) => {
+    const d = document.createElement('div');
+    d.className = 'fld';
+
+    if (kind === 'src'){
+      d.innerHTML = '<label>'+label+'</label><select class="wsel" style="width:100%;height:42px"></select>';
+      const sel = d.querySelector('select');
+      sources.forEach((x,i) => {
+        const o = document.createElement('option');
+        o.value = i;
+        o.textContent = x.n + (x.r ? '  —  ' + x.r + '%' : '  —  без комиссии');
+        if (i === acc.src) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.onchange = e => { acc.src = +e.target.value; };
+      box.appendChild(d);
+      return;
+    }
+
+    if (kind === 'types'){
+      d.innerHTML = '<label>'+label+'</label>';
+      const ch = document.createElement('div');
+      ch.className = 'pick';
+      ORDER_TYPES.forEach(t => {
+        const b = document.createElement('button');
+        b.textContent = t;
+        const on = acc.types.includes(t);
+        if (on){ b.style.background = 'var(--signal)'; b.style.color = '#fff'; b.style.borderColor = 'var(--signal)'; }
+        b.onclick = () => {
+          const i = acc.types.indexOf(t);
+          if (i >= 0) acc.types.splice(i,1); else acc.types.push(t);
+          buildWiz();
+        };
+        ch.appendChild(b);
+      });
+      d.appendChild(ch);
+      box.appendChild(d);
+      return;
+    }
+
+    if (kind === 'note'){
+      d.innerHTML = '<label>'+label+'</label><textarea></textarea>';
+      const ta = d.querySelector('textarea');
+      ta.value = wizNote;
+      ta.onblur = e => { wizNote = e.target.value; };
+      box.appendChild(d);
+      return;
+    }
+
+    if (kind === 'accnum'){
+      d.innerHTML = '<label>'+label+'</label><input inputmode="numeric" value="'+(acc.extra||'')+'">';
+      d.querySelector('input').onblur = e => {
+        const v = parseInt(String(e.target.value).replace(/[^0-9]/g,''),10);
+        acc.extra = isNaN(v) ? 0 : v;
+      };
+      box.appendChild(d);
+      return;
+    }
+
+    const tag = kind === 'area' ? '<textarea></textarea>'
+              : '<input type="' + (kind==='date' ? 'date' : kind==='tel' ? 'tel' : 'text') + '">';
+    d.innerHTML = '<label>'+label+'</label>' + tag;
+    const inp = d.querySelector('input,textarea');
+    inp.value = C[key] || '';
+    inp.oninput = e => { C[key] = e.target.value; };
+
+    if (kind === 'device'){
+      const ch = document.createElement('div');
+      ch.className = 'pick';
+      ch.style.marginTop = '7px';
+      DEVICES.forEach(t => {
+        const b = document.createElement('button');
+        b.textContent = t;
+        b.onclick = () => { C.device = t; inp.value = t; };
+        ch.appendChild(b);
+      });
+      d.appendChild(ch);
+    }
+    box.appendChild(d);
+  });
+
+  if (st.docs){
+    const t = document.createElement('div');
+    t.className = 'tsec'; t.textContent = 'Документы';
+    box.appendChild(t);
+    [['Договор-заказ-наряд', docNaryad],
+     ['Договор на выполнение работ', docRabot],
+     ['Гарантийный талон', docTalon],
+     ['Дополнительное соглашение', docDop]].forEach(([n, fn]) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.innerHTML = '<div class="opt-main"><div class="opt-t">'+n+'</div>'+
+                    '<div class="opt-s">Открыть, подписать и сохранить в PDF</div></div>';
+      b.onclick = () => openDoc(fn);
+      box.appendChild(b);
+    });
+  }
+}
+
+function wizFinish(){
+  const r = curRec();
+  if (r){
+    const keep = {status:r.status, comments:r.comments, files:r.files, history:r.history, created:r.created};
+    const rec = mergeInto(snapshot(), false);
+    Object.assign(rec, keep);
+    if (wizNote.trim()){
+      rec.comments = rec.comments || [];
+      rec.comments.unshift({at:new Date().toISOString(), t:wizNote.trim()});
+    }
+    logTo(rec, 'Заказ оформлен');
+    const i = store.findIndex(x => x.id === rec.id);
+    if (i >= 0) store[i] = rec;
+    saveStore();
+  }
+  $('#wiz').classList.remove('on');
+  buildBoard();
+  openCard(cardId);
+}
+
+$('#bWizPrev').onclick = () => { if (wizStep > 0){ wizStep--; buildWiz(); } };
+$('#bWizNext').onclick = () => {
+  if (wizStep < WIZ.length-1){ wizStep++; buildWiz(); window.scrollTo(0,0); }
+  else wizFinish();
+};
+$('#bWizClose').onclick = () => {
+  $('#wiz').classList.remove('on');
+  buildBoard();
+  if (cardId) openCard(cardId);
+};
+
+
+// ---------- хранилище заказов ----------
+const DBKEY = 'orders.v1';
+let store = null;
+function loadStore(){
+  try{ const raw = localStorage.getItem(DBKEY); store = raw ? JSON.parse(raw) : []; }
+  catch(e){ store = null; }
+}
+function saveStore(){
+  if (!store) return false;
+  try{ localStorage.setItem(DBKEY, JSON.stringify(store.slice(0,300))); return true; }
+  catch(e){ return false; }
+}
+loadStore();
+
+function snapshot(){
+  const t = totals();
+  const src = sources[acc.src] || {n:'—', r:0};
+  const m = money(order, discount, src.r, acc.extra);
+  return {
+    id: curId || Date.now(),
+    saved: new Date().toISOString(),
+    date: today(),
+    client: C.client || '', phone: C.phone || '',
+    device: C.device || '', docNo: C.docNo || '',
+    total: t.net, gross: t.gross, discount,
+    src: {n: src.n, r: src.r}, types: acc.types.slice(), extra: acc.extra || 0, m,
+    lines: JSON.parse(JSON.stringify(order)),
+    fields: JSON.parse(JSON.stringify(C)),
+  };
+}
+function mergeInto(rec, log){
+  const old = store && store.find(r => r.id === rec.id);
+  rec.status   = (old && old.status)   || 'agree';
+  rec.created  = (old && old.created)  || rec.saved;
+  rec.comments = (old && old.comments) || [];
+  rec.files    = (old && old.files)    || [];
+  rec.history  = (old && old.history)  || [];
+  if (log === false) return rec;
+  if (!old) logTo(rec, 'Заказ создан');
+  else if (old.total !== rec.total) logTo(rec, 'Сумма изменена: ' + fmt(old.total) + ' → ' + fmt(rec.total) + ' ₽');
+  else logTo(rec, 'Заказ сохранён');
+  return rec;
+}
+function saveOrder(silent){
+  if (!store){ if(!silent) alert('Телефон не разрешил хранить данные.'); return; }
+  const rec = mergeInto(snapshot());
+  curId = rec.id;
+  const i = store.findIndex(r => r.id === rec.id);
+  if (i >= 0) store[i] = rec; else store.unshift(rec);
+  const ok = saveStore();
+  if (!silent) alert(ok ? 'Сохранено.' : 'Не удалось сохранить.');
+}
+function openOrder(rec){
+  order = JSON.parse(JSON.stringify(rec.lines || []));
+  discount = rec.discount || 0;
+  Object.keys(C).forEach(k => delete C[k]);
+  Object.assign(C, rec.fields || {});
+  acc.extra = rec.extra || 0;
+  acc.types = (rec.types || []).slice();
+  const si = sources.findIndex(x => x.n === (rec.src && rec.src.n));
+  acc.src = si >= 0 ? si : 0;
+  curId = rec.id;
+}
+function delOrder(id){
+  if (!store) return;
+  store = store.filter(r => r.id !== id);
+  saveStore();
+  if (curId === id) curId = null;
+}
+function render(){}          // калькулятора здесь нет
+
+// ---------- приём заказа из калькулятора ----------
+const HANDOFF = 'handoff.v1';
+function takeHandoff(){
+  let h = null;
+  try{ const raw = localStorage.getItem(HANDOFF); if (raw) h = JSON.parse(raw); }catch(e){}
+  if (!h) return false;
+  try{ localStorage.removeItem(HANDOFF); }catch(e){}
+  if (!store) return false;
+
+  if (h.target){
+    const r = store.find(x => x.id === h.target);
+    if (r){
+      openOrder(r);
+      order = order.concat(h.lines);
+      if (h.discount) discount = h.discount;
+      const rec = mergeInto(snapshot());
+      logTo(rec, 'Добавлено позиций из калькулятора: ' + h.lines.length);
+      const i = store.findIndex(x => x.id === rec.id);
+      store[i] = rec;
+      saveStore();
+      openCard(rec.id);
+      return true;
+    }
+  }
+  order = h.lines.slice();
+  discount = h.discount || 0;
+  Object.keys(C).forEach(k => delete C[k]);
+  C.docDate = today(); C.term = '14';
+  resetAcc();
+  estimate = null;
+  curId = Date.now();
+  const rec = mergeInto(snapshot());
+  store.unshift(rec);
+  saveStore();
+  cardId = rec.id;
+  openWiz(rec.id);        // новый заказ ведём по шагам
+  return true;
+}
+
+// ---------- доска ----------
+let boardFilter = '';
+let boardMonth = null;        // null — текущий месяц
+
+function daysSince(iso){
+  const d = new Date(iso);
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+function monthKey(iso){
+  const d = new Date(iso);
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function curMonthKey(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+function monthTitle(k){
+  const [y,m] = k.split('-').map(Number);
+  return new Date(y, m-1, 1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+}
+function plural(n, a, b, c){
+  const n10 = n % 10, n100 = n % 100;
+  if (n10 === 1 && n100 !== 11) return a;
+  if (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20)) return b;
+  return c;
+}
+
+function buildBoard(){
+  $('#date2').textContent = today();
+  const mk = boardMonth || curMonthKey();
+  $('#bTitle').textContent = boardMonth ? ('Заказы · ' + monthTitle(mk)) : 'Заказы · текущий месяц';
+
+  const a = store ? analData('month') : null;
+  $('#fkpi').innerHTML =
+    '<div><i>Оборот за месяц</i><b>'+(a?fmt(a.agg.revenue):'0')+' ₽</b></div>'+
+    '<div><i>Чистыми</i><b class="good">'+(a?fmt(a.agg.profit):'0')+' ₽</b></div>'+
+    '<div><i>Заказов</i><b>'+(a?a.rows.length:0)+'</b></div>';
+
+  const fl = $('#boardFilter');
+  fl.innerHTML = '';
+  const ch = document.createElement('div'); ch.className='chips';
+  [['','Все']].concat(STATUSES.map(x => [x.k, x.t])).forEach(([kk,t]) => {
+    const b = document.createElement('button');
+    const st = kk ? stOf(kk) : null;
+    b.className = 'chip2' + (boardFilter === kk ? ' on' : '');
+    if (boardFilter === kk && st){ b.style.background = st.c; b.style.borderColor = st.c; b.style.color='#fff'; }
+    else if (st){ b.style.color = st.c; }
+    b.textContent = t;
+    b.onclick = () => { boardFilter = kk; buildBoard(); };
+    ch.appendChild(b);
+  });
+  fl.appendChild(ch);
+
+  const box = $('#boardList');
+  box.innerHTML = '';
+  if (!store){
+    box.innerHTML = '<div class="none">Телефон не разрешил хранить данные — доска недоступна.</div>';
+    return;
+  }
+
+  const q = $('#fq').value.trim().toLowerCase();
+  let list = store.filter(r => monthKey(r.created || r.saved) === mk);
+  if (q) list = list.filter(r => ((r.client||'')+' '+(r.device||'')+' '+(r.docNo||'')).toLowerCase().includes(q));
+  if (boardFilter) list = list.filter(r => (r.status||'agree') === boardFilter);
+
+  // закрытые всегда внизу, остальные — свежие сверху
+  list = list.slice().sort((x,y) => {
+    const cx = x.status==='closed' ? 1 : 0, cy = y.status==='closed' ? 1 : 0;
+    if (cx !== cy) return cx - cy;
+    return new Date(y.created||y.saved) - new Date(x.created||x.saved);
+  });
+
+  if (!list.length){
+    box.innerHTML = '<div class="none">' +
+      (q || boardFilter ? 'Ничего не нашлось.' : 'В этом месяце заказов пока нет.') + '</div>';
+    return;
+  }
+
+  list.forEach(r => {
+    const st = stOf(r.status || 'agree');
+    const d = daysSince(r.created || r.saved);
+    const dead = DEAD.includes(r.status);
+    const old = !dead && d >= OLD_DAYS;
+
+    const b = document.createElement('button');
+    b.className = 'brow' + (r.status==='closed' ? ' closed' : '') + (old ? ' old' : '');
+    b.style.background = old ? '' : st.bg;
+    b.style.borderLeftColor = old ? '' : st.c;
+    b.innerHTML =
+      '<div class="brow-main">'+
+        '<div class="brow-t"></div>'+
+        '<div class="brow-s"></div>'+
+      '</div>'+
+      '<div class="brow-r">'+
+        '<div class="brow-sum">'+fmt(r.total||0)+' ₽</div>'+
+        '<div class="brow-age">'+(d===0 ? 'сегодня' : d + ' ' + plural(d,'день','дня','дней'))+'</div>'+
+      '</div>';
+    b.querySelector('.brow-t').textContent = r.client || 'Без имени';
+    b.querySelector('.brow-s').textContent =
+      st.t + '  ·  ' + (r.device || 'техника не указана') +
+      ((r.files && r.files.length) ? '  ·  ' + r.files.length + ' файл.' : '') +
+      ((r.comments && r.comments.length) ? '  ·  ' + r.comments.length + ' комм.' : '');
+    b.onclick = () => openCard(r.id);
+    box.appendChild(b);
+  });
+}
+
+function buildMonths(){
+  const box = $('#monthsBody');
+  box.innerHTML = '';
+  if (!store){ box.innerHTML = '<div class="none">База недоступна.</div>'; return; }
+  const keys = {};
+  store.forEach(r => {
+    const k = monthKey(r.created || r.saved);
+    keys[k] = keys[k] || {n:0, sum:0};
+    keys[k].n++; keys[k].sum += (r.total||0);
+  });
+  const cur = curMonthKey();
+  Object.keys(keys).sort().reverse().forEach(k => {
+    const b = document.createElement('button');
+    b.className = 'opt' + (k === (boardMonth||cur) ? ' act' : '');
+    b.innerHTML = '<div class="opt-main"><div class="opt-t"></div><div class="opt-s"></div></div>'+
+                  '<div class="opt-p">'+fmt(keys[k].sum)+' ₽</div>';
+    b.querySelector('.opt-t').textContent = monthTitle(k) + (k===cur ? '  ·  текущий' : '');
+    b.querySelector('.opt-s').textContent = keys[k].n + ' ' + plural(keys[k].n,'заказ','заказа','заказов');
+    b.onclick = () => {
+      boardMonth = (k === cur) ? null : k;
+      $('#months').classList.remove('on');
+      buildBoard();
+    };
+    box.appendChild(b);
+  });
+}
+
+// ---------- связывание ----------
+$('#bMenuF').onclick = () => { buildMenu(); $('#menu').classList.add('on'); };
+$('#bMenuClose').onclick = () => $('#menu').classList.remove('on');
+$('#bCardClose').onclick = () => { $('#card').classList.remove('on'); buildBoard(); };
+$('#bAcctClose').onclick = () => $('#acct').classList.remove('on');
+$('#bSrcClose').onclick = () => $('#srcs').classList.remove('on');
+$('#bAnalClose').onclick = () => $('#anal').classList.remove('on');
+$('#bFormClose').onclick = () => { $('#form').classList.remove('on'); $('#outs').classList.add('on'); };
+$('#bOutClose').onclick = () => $('#outs').classList.remove('on');
+$('#bDocClose').onclick = () => $('#docview').classList.remove('on');
+$('#bMonthsClose').onclick = () => $('#months').classList.remove('on');
+$('#bMonths').onclick = () => { buildMonths(); $('#months').classList.add('on'); };
+$('#bCalc').onclick = () => { location.href = 'index.html'; };
+$('#fq').oninput = buildBoard;
+$('#fkpi').onclick = () => { buildAnal(); $('#anal').classList.add('on'); };
+
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+
+buildPad();
+openFiles();
+buildBoard();
+if (location.hash === '#handoff'){
+  history.replaceState(null,'','base.html');
+  setTimeout(() => { if (takeHandoff()) buildBoard(); }, 60);
+}
+
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
